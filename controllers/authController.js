@@ -5,21 +5,41 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const createUser = async (req, res) => {
   try {
-    let user = await UserModel.findOne({ email: req.body.email });
-    if (user) {
-      throw {
-        message: "User already exists",
-      };
+    let user;
+    if (!req.body._id) {
+      user = await UserModel.findOne({ email: req.body.email });
+      if (user) {
+        throw {
+          message: "User already exists",
+        };
+      }
     }
+
     let salt = await bcrypt.genSalt(10);
     let secPass = await bcrypt.hash(req.body.password, salt);
-    user = await UserModel.create({
-      email: req.body.email,
-      name: req.body.name,
-      password: secPass,
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-    });
+    if (req.body._id) {
+      user = await UserModel.findByIdAndUpdate(
+        req.body._id,
+        {
+          email: req.body.email,
+          name: req.body.name,
+          password: req.body.password,
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
+          status:req.body.status,
+        },
+        { new: true }
+      );
+    } else {
+      user = await UserModel.create({
+        email: req.body.email,
+        name: req.body.name,
+        password: secPass,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        status:req.body.status,
+      });
+    }
 
     let data = {
       id: user._id,
@@ -41,7 +61,7 @@ const createUser = async (req, res) => {
     res.status(200).json({
       status: true,
       data: jwtUserResponse,
-      message: "User created successfully",
+      message: req.body._id?"User Updated Successfully":"User created successfully",
     });
   } catch (err) {
     console.log("Error", err);
@@ -68,6 +88,12 @@ const login = async (req, res) => {
     if (!user) {
       throw {
         message: "Email is not registered.",
+      };
+    }
+
+    if(user.status=="inactive") {
+      throw {
+        message: "Your account has been deactivated. Please contact admin to activate your account.",
       };
     }
 
@@ -111,7 +137,7 @@ const login = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    let userResponse = await UserModel.find().lean();
+    let userResponse = await UserModel.find({}, { password: 0 }).lean();
 
     res.status(200).json({
       status: true,
