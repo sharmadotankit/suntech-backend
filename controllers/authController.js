@@ -7,43 +7,47 @@ const createUser = async (req, res) => {
   try {
     let user;
     if (!req.body._id) {
-      user = await UserModel.findOne({ email: req.body.email });
-      if (user) {
+      let existingUser = await UserModel.findOne({ email: req.body.email });
+      if (existingUser) {
         throw {
           message: "User already exists",
         };
       }
-    }
 
-    let salt = await bcrypt.genSalt(10);
-    let secPass = await bcrypt.hash(req.body.password, salt);
-    if (req.body._id) {
-      user = await UserModel.findByIdAndUpdate(
-        req.body._id,
-        {
-          email: req.body.email,
-          name: req.body.name,
-          password: req.body.password,
-          firstName: req.body.firstName,
-          lastName: req.body.lastName,
-          status:req.body.status,
-        },
-        { new: true }
-      );
-    } else {
+      let salt = await bcrypt.genSalt(10);
+      let secPass = await bcrypt.hash(req.body.password, salt);
       user = await UserModel.create({
         email: req.body.email,
         name: req.body.name,
         password: secPass,
         firstName: req.body.firstName,
         lastName: req.body.lastName,
-        status:req.body.status,
+        status: req.body.status,
+        role: req.body.role,
+        initials:req.body.initials,
       });
+    }else{
+      user = await UserModel.findByIdAndUpdate(
+        req.body._id,
+        {$set:{
+          email: req.body.email,
+          name: req.body.name,
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
+          status: req.body.status,
+          role: req.body.role,
+          initials:req.body.initials,
+        }
+         
+        },
+        { new: true }
+      );
     }
 
     let data = {
       id: user._id,
       email: user.email,
+      role:user.role,
     };
 
     jwtOptions = { expiresIn: "360h" };
@@ -61,7 +65,7 @@ const createUser = async (req, res) => {
     res.status(200).json({
       status: true,
       data: jwtUserResponse,
-      message: req.body._id?"User Updated Successfully":"User created successfully",
+      message: req.body._id ? "User Updated Successfully" : "User created successfully",
     });
   } catch (err) {
     console.log("Error", err);
@@ -91,7 +95,7 @@ const login = async (req, res) => {
       };
     }
 
-    if(user.status=="inactive") {
+    if (user.status == "inactive") {
       throw {
         message: "Your account has been deactivated. Please contact admin to activate your account.",
       };
@@ -99,12 +103,18 @@ const login = async (req, res) => {
 
     let passwordCompare = await bcrypt.compare(password, user.password);
     if (!passwordCompare) {
-      throw { message: "Wrong Credentials" };
+      return res.status(401).json({
+        status: false,
+        statusCode: 401,
+        message: "Wrong Credentials",
+        data: null,
+      });
     }
     let data = {
       user: {
         id: user._id,
         email: user.email,
+        role:user.role,
       },
     };
 

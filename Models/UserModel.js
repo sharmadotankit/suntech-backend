@@ -26,6 +26,15 @@ const UserSchema = new Schema(
     },
     token:{
       type: String,
+    },
+    role:{
+      type: String,
+      required: true,
+      enum: ['admin', 'hr', 'finance'],
+    },
+    initials:{
+      type: String,
+      required: true,
     }
   },
   { timestamp: true }

@@ -13,11 +13,11 @@ const connectToMongo = require("./utils/db");
 connectToMongo();
 
 const authRoute = require("./routes/authRoute");
-const userRoute = require("./routes/userRoute");
+const adminRoute = require("./routes/adminRoute");
 
 let port = process.env.PORT;
 
 app.use("/api/auth", authRoute);
-app.use("/api/user", userRoute);
+app.use("/api/admin", adminRoute);
 
 app.listen(port, () => console.log(`Server listening at port ${port}`));
