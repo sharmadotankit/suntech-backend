@@ -23,7 +23,7 @@ const upload = multer({ storage: storage });
 router.get('/company-data/:companyName', authMiddleWare.checkIfValidUser,adminController.getCompanyData)
 router.put('/update-company', authMiddleWare.checkIfAdmin, adminController.updateCompany)
 router.get('/client-code', authMiddleWare.checkIfAdmin, adminController.getClientCodeForNewClient)
-router.post('/create-update-client', authMiddleWare.checkIfAdmin,('clientDocuments'), adminController.createUpdateClient)
+router.post('/create-update-client', authMiddleWare.checkIfAdmin,upload.any('clientDocuments'), adminController.createUpdateClient)
 
 
 module.exports = router;
