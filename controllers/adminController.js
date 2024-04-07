@@ -93,16 +93,68 @@ const getClientCodeForNewClient = async (req, res) => {
 
 const createUpdateClient = async (req, res) => {
   try {
-    let data = req.body;
-    let files = req.files;
-    console.log(data)
-    console.log(files)
-    return;
-    let companyId = data._id;
-    delete data._id;
-    let companyResponse = await CompanyModel.findByIdAndUpdate(companyId, { ...data }, { new: true });
+    let files= req.files;
+    let {clientCode, clientName, gstNo, allAddress,clientDocumentsData,additionalData,companyId,clientCodeNumber} = req.body;
 
-    if (!companyResponse) {
+    allAddress = JSON.parse(allAddress)
+    clientDocumentsData = JSON.parse(clientDocumentsData)
+
+
+    clientDocumentsData.forEach(item=>{
+      let filteredFile = files.filter(fileItem=> fileItem.originalname == item.name);
+      if(filteredFile.length >0){
+        item.file = filteredFile[0];
+      }
+    })
+
+    let dataToInsert = {
+      clientCode,
+      clientName,
+      gstNo,
+      allAddress,
+      clientDocuments:clientDocumentsData,
+      additionalData,
+      companyId,
+      clientCodeNumber:parseInt(clientCodeNumber),
+    }
+
+  
+    const clientResponse = await ClientModel.create(dataToInsert)
+
+    if (!clientResponse) {
+      res.status(400).json({
+        status: false,
+        statusCode: 400,
+        message: "Field to create client",
+        data: null,
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "Created client successfully",
+      data: clientResponse,
+    });
+  } catch (err) {
+    console.log('err',err)
+    res.status(400).json({
+      status: false,
+      statusCode: 400,
+      message: err.message,
+      error: err,
+    });
+  }
+};
+
+
+const fetchClientsForCompany = async (req, res) => {
+  try {
+    let companyId = req.params.companyId;
+    let clientResponse = await ClientModel.find({ companyId });
+
+    if (!clientResponse) {
       res.status(400).json({
         status: false,
         statusCode: 400,
@@ -115,8 +167,8 @@ const createUpdateClient = async (req, res) => {
     res.status(200).json({
       status: true,
       statusCode: 200,
-      message: "Update company details Successful",
-      data: companyResponse,
+      message: "Fetch clients Successful",
+      data: clientResponse,
     });
   } catch (err) {
     res.status(400).json({
@@ -133,4 +185,5 @@ module.exports = {
   updateCompany,
   getClientCodeForNewClient,
   createUpdateClient,
+  fetchClientsForCompany,
 };

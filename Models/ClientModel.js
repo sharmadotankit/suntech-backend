@@ -12,7 +12,7 @@ const ClientSchema = new Schema(
             required: true,
             unique: true,
         },
-        clientCodeNumber:{
+        clientCodeNumber: {
             type: Number,
             required: true,
             unique: true,
@@ -28,7 +28,6 @@ const ClientSchema = new Schema(
                 addressLine2: { type: String, required: true },
                 city: { type: String, required: true },
                 state: { type: String, required: true },
-                country: { type: String, required: true },
                 zipCode: { type: String, required: true },
             },
             shippingAddress: {
@@ -36,7 +35,6 @@ const ClientSchema = new Schema(
                 addressLine2: { type: String, required: true },
                 city: { type: String, required: true },
                 state: { type: String, required: true },
-                country: { type: String, required: true },
                 zipCode: { type: String, required: true },
             },
             isDefault: {
@@ -50,17 +48,28 @@ const ClientSchema = new Schema(
                 originalname: { type: String },
                 encoding: { type: String },
                 mimetype: { type: String },
-                destination: { type: String },
-                filename: { type: String },
-                path: { type: String },
                 size: { type: Number },
+                bucket: { type: String },
+                key: { type: String },
+                acl: { type: String },
+                contentType: { type: String },
+                contentDisposition: { type: String },
+                contentEncoding: { type: String },
+                storageClass: { type: String },
+                serverSideEncryption: { type: String },
+                metadata: { type: Schema.Types.Mixed,default: null},
+                location: { type: String },
+                etag: { type: String },
             },
             description: {
                 type: String,
             }
         }],
-        additionalData:{
-            type:String,
+        additionalData: {
+            type: String,
+        },
+        companyId:{type: Schema.Types.ObjectId,
+            ref: 'company'
         }
     },
     { timestamp: true }
