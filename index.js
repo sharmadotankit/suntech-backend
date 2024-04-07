@@ -1,7 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+require('./aws-config');
+
+
 const app = express();
+
 
 
 app.use(cors());

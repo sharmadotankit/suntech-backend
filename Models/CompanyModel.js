@@ -8,7 +8,7 @@ const CompanySchema = new Schema(
       required: true,
       unique: true,
     },
-    gSTNo: {
+    gstNo: {
       type: String,
       required: true,
     },
