@@ -1,5 +1,5 @@
 const CompanyModel = require('../Models/CompanyModel');
-const ClientModel =  require('../Models/ClientModel');
+const ClientModel = require('../Models/ClientModel');
 
 
 const getCompanyData = async (req, res) => {
@@ -93,16 +93,17 @@ const getClientCodeForNewClient = async (req, res) => {
 
 const createUpdateClient = async (req, res) => {
   try {
-    let files= req.files;
-    let {clientCode, clientName, gstNo, allAddress,clientDocumentsData,additionalData,companyId,clientCodeNumber} = req.body;
+    let files = req.files;
+    let {_id, clientCode, clientName, gstNo, allAddress, clientDocumentsData, additionalData, companyId, clientCodeNumber } = req.body;
 
     allAddress = JSON.parse(allAddress)
     clientDocumentsData = JSON.parse(clientDocumentsData)
 
 
-    clientDocumentsData.forEach(item=>{
-      let filteredFile = files.filter(fileItem=> fileItem.originalname == item.name);
-      if(filteredFile.length >0){
+
+    clientDocumentsData.forEach(item => {
+      let filteredFile = files.filter(fileItem => fileItem.originalname == item.name);
+      if (filteredFile.length > 0) {
         item.file = filteredFile[0];
       }
     })
@@ -112,20 +113,24 @@ const createUpdateClient = async (req, res) => {
       clientName,
       gstNo,
       allAddress,
-      clientDocuments:clientDocumentsData,
+      clientDocuments: clientDocumentsData,
       additionalData,
       companyId,
-      clientCodeNumber:parseInt(clientCodeNumber),
+      clientCodeNumber: parseInt(clientCodeNumber),
     }
 
-  
-    const clientResponse = await ClientModel.create(dataToInsert)
+    let clientResponse;
+    if (_id) {
+      clientResponse = await ClientModel.findByIdAndUpdate(_id, dataToInsert, { new: true });
+    } else {
+      clientResponse = await ClientModel.create(dataToInsert)
+    }
 
     if (!clientResponse) {
       res.status(400).json({
         status: false,
         statusCode: 400,
-        message: "Field to create client",
+        message: `Field to ${_id?"update":"create"} client`,
         data: null,
       });
       return;
@@ -138,7 +143,7 @@ const createUpdateClient = async (req, res) => {
       data: clientResponse,
     });
   } catch (err) {
-    console.log('err',err)
+    console.log('err', err)
     res.status(400).json({
       status: false,
       statusCode: 400,
@@ -180,10 +185,43 @@ const fetchClientsForCompany = async (req, res) => {
   }
 };
 
+const getClientById = async (req, res) => {
+  try {
+    let clientId = req.params.clientId;
+    let clientResponse = await ClientModel.findById(clientId);
+
+    if (!clientResponse) {
+      res.status(400).json({
+        status: false,
+        statusCode: 400,
+        message: "Client not found",
+        data: null,
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "Fetch client Successful",
+      data: clientResponse,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: false,
+      statusCode: 400,
+      message: err.message,
+      error: err,
+    });
+  }
+};
+
+
 module.exports = {
   getCompanyData,
   updateCompany,
   getClientCodeForNewClient,
   createUpdateClient,
   fetchClientsForCompany,
+  getClientById,
 };
