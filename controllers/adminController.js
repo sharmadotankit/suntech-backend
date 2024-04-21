@@ -94,7 +94,7 @@ const getClientCodeForNewClient = async (req, res) => {
 const createUpdateClient = async (req, res) => {
   try {
     let files = req.files;
-    let {_id, clientCode, clientName, gstNo, allAddress, clientDocumentsData, additionalData, companyId, clientCodeNumber } = req.body;
+    let { _id, clientCode, clientName, gstNo, allAddress, clientDocumentsData, additionalData, companyId, clientCodeNumber } = req.body;
 
     allAddress = JSON.parse(allAddress)
     clientDocumentsData = JSON.parse(clientDocumentsData)
@@ -130,7 +130,7 @@ const createUpdateClient = async (req, res) => {
       res.status(400).json({
         status: false,
         statusCode: 400,
-        message: `Field to ${_id?"update":"create"} client`,
+        message: `Field to ${_id ? "update" : "create"} client`,
         data: null,
       });
       return;
@@ -156,10 +156,24 @@ const createUpdateClient = async (req, res) => {
 
 const fetchClientsForCompany = async (req, res) => {
   try {
-    let companyId = req.params.companyId;
-    let clientResponse = await ClientModel.find({ companyId });
+    const { companyId, sortField, sortOrder, clientNameFilter } = req.query;
+    let sortQuery = {};
+    if (sortField) {
+      sortQuery[sortField] = sortOrder === "asc" ? 1 : -1;
+    }
 
-    if (!clientResponse) {
+    let fetchQuery = { companyId: companyId };
+    if (clientNameFilter) {
+      fetchQuery.clientName = new RegExp(clientNameFilter, 'i');
+    }
+
+
+    const clients = await ClientModel.find({ ...fetchQuery })
+      .select('_id clientName clientCode gstNo')
+      .sort(sortQuery)
+      .lean();
+
+    if (!clients) {
       res.status(400).json({
         status: false,
         statusCode: 400,
@@ -168,12 +182,11 @@ const fetchClientsForCompany = async (req, res) => {
       });
       return;
     }
-
     res.status(200).json({
       status: true,
       statusCode: 200,
+      data: clients,
       message: "Fetch clients Successful",
-      data: clientResponse,
     });
   } catch (err) {
     res.status(400).json({

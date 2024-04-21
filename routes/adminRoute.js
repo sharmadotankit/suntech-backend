@@ -28,7 +28,7 @@ router.get('/company-data/:companyName', authMiddleWare.checkIfValidUser,adminCo
 router.put('/update-company', authMiddleWare.checkIfAdmin, adminController.updateCompany)
 router.get('/client-code', authMiddleWare.checkIfAdmin, adminController.getClientCodeForNewClient)
 router.post('/create-update-client', authMiddleWare.checkIfAdmin,upload.array("clientDocuments"), adminController.createUpdateClient)
-router.get('/clients/:companyId', authMiddleWare.checkIfValidUser,adminController.fetchClientsForCompany)
+router.get('/clients', authMiddleWare.checkIfValidUser,adminController.fetchClientsForCompany)
 router.get('/client/:clientId', authMiddleWare.checkIfAdmin,adminController.getClientById)
 
 module.exports = router;
