@@ -1,5 +1,6 @@
 const CompanyModel = require('../Models/CompanyModel');
 const ClientModel = require('../Models/ClientModel');
+const OfferModel = require('../Models/OfferModel');
 
 
 const getCompanyData = async (req, res) => {
@@ -169,7 +170,7 @@ const fetchClientsForCompany = async (req, res) => {
 
 
     const clients = await ClientModel.find({ ...fetchQuery })
-      .select('_id clientName clientCode gstNo')
+      .select('_id clientName clientCode gstNo allAddress')
       .sort(sortQuery)
       .lean();
 
@@ -230,6 +231,30 @@ const getClientById = async (req, res) => {
 };
 
 
+const getOfferCodeForNewOffer = async (req, res) => {
+  try {
+    const highestOffer = await OfferModel.findOne().sort({ offerCodeNumber: -1 }).limit(1);
+    let maxOfferCode = 1;
+    if (highestOffer) {
+      maxOfferCode = highestOffer.offerCodeNumber + 1;
+    }
+    res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "Offer code fetched successfully",
+      data: maxOfferCode,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: false,
+      statusCode: 400,
+      message: err.message,
+      error: err,
+    });
+  }
+};
+
+
 module.exports = {
   getCompanyData,
   updateCompany,
@@ -237,4 +262,5 @@ module.exports = {
   createUpdateClient,
   fetchClientsForCompany,
   getClientById,
+  getOfferCodeForNewOffer,
 };
