@@ -44,6 +44,51 @@ const checkIfAdmin = (req, res, next) => {
   }
 };
 
+const checkIfValidHR = (req, res, next) => {
+  const header = req.headers.authorization;
+  if(!header){
+    return res.status(401).json({ msg: "No header, authorization denied" });
+  }
+  const token = header.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ msg: "No token, authorization denied" });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded.user;
+    if(decoded.user.role=='admin'|| decoded.user.role=='hr'){
+      next();
+    }else{
+      res.status(401).json({ msg: "Unauthorized request. Only admin can update this data." });
+    }
+  } catch (err) {
+    res.status(401).json({ msg: "Token is not valid" });
+  }
+};
+
+const checkIfValidFinance = (req, res, next) => {
+  const header = req.headers.authorization;
+  if(!header){
+    return res.status(401).json({ msg: "No header, authorization denied" });
+  }
+  const token = header.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ msg: "No token, authorization denied" });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded.user;
+    if(decoded.user.role=='admin' || decoded.user.role=='finance'){
+      next();
+    }else{
+      res.status(401).json({ msg: "Unauthorized request. Only admin can update this data." });
+    }
+  } catch (err) {
+    res.status(401).json({ msg: "Token is not valid" });
+  }
+};
+
+
 
 
 

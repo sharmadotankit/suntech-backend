@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const OfferSchema = new Schema(
+const ProjectSchema = new Schema(
     {
         companyId:{
             type: Schema.Types.ObjectId,
@@ -11,6 +11,11 @@ const OfferSchema = new Schema(
         clientId:{
             type: Schema.Types.ObjectId,
             ref: 'client',
+            required:true,
+        },
+        offerId:{
+            type: Schema.Types.ObjectId,
+            ref: 'offers',
             required:true,
         },
         description: {type:String, required: true},
@@ -23,7 +28,7 @@ const OfferSchema = new Schema(
         },
         offerDate:{ type: Date, required:true},
         offerKindAttention: { type: String, required: true},
-        offerSubject: { type: String, required:true},
+        Projectsubject: { type: String, required:true},
         offerCode: { type: String, required: true},
         offerReference: { type: String, required: true},
         offerCodeNumber: {
@@ -34,16 +39,10 @@ const OfferSchema = new Schema(
         offerTotal:{
             type:Number,
             required:true,
-        },
-        scopeOfWork: { type: String, required: true},
-        designFee: { type: String, required: true},
-        siteVisits: { type: String, required: true},
-        deliverySchedule: { type: String, required: true},
-        otherTermsAndConditions: { type: String, required: true},
-
+        }
     },
     { timestamp: true }
 );
 
-const Offers = mongoose.model("offer", OfferSchema);
-module.exports = Offers;
+const Project = mongoose.model("project", ProjectSchema);
+module.exports = Project;

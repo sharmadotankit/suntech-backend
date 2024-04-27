@@ -32,5 +32,7 @@ router.get('/clients', authMiddleWare.checkIfValidUser, adminController.fetchCli
 router.get('/client/:clientId', authMiddleWare.checkIfAdmin, adminController.getClientById)
 router.get('/offer-code', authMiddleWare.checkIfAdmin, adminController.getOfferCodeForNewOffer)
 router.post('/create-update-offer', authMiddleWare.checkIfAdmin, adminController.createUpdateOffer)
+router.get('/offers', authMiddleWare.checkIfValidUser, adminController.fetchOfferForCompany)
+router.get('/offer/:offerId', authMiddleWare.checkIfAdmin, adminController.getOfferById)
 
 module.exports = router;
