@@ -18,28 +18,38 @@ const ProjectSchema = new Schema(
             ref: 'offers',
             required:true,
         },
-        description: {type:String, required: true},
-        clientBillingAddress:{
+        projectNumber:{type:String,required:true},
+        isActive:{type:Boolean,default:true},
+        projectType:{type:String, required:true},
+        orderDate:{type:Date, required:true},
+        projectCorrespondence:{
+            name:{type:String,required:true},
+            designation:{type:String},
+            contactNo:{type:String},
+            email:{type:String}
+        },
+        siteLocation:{type:String, required:true},
+        mapLocations:[{
+            name:{type:String,required:true},
+            googleCordinate:{type:String, required:true}
+        }],
+        gstNo:{type:String,required:true},
+        billToAddress:{
             addressLine1: { type: String, required: true },
             addressLine2: { type: String, required: true },
             city: { type: String, required: true },
             state: { type: String, required: true },
             zipCode: { type: String, required: true },
         },
-        offerDate:{ type: Date, required:true},
-        offerKindAttention: { type: String, required: true},
-        Projectsubject: { type: String, required:true},
-        offerCode: { type: String, required: true},
-        offerReference: { type: String, required: true},
-        offerCodeNumber: {
-            type: Number,
-            required: true,
-            unique: true,
-        },
-        offerTotal:{
-            type:Number,
-            required:true,
+        shipToAddress:{
+            addressLine1: { type: String, required: true },
+            addressLine2: { type: String, required: true },
+            city: { type: String, required: true },
+            state: { type: String, required: true },
+            zipCode: { type: String, required: true },
         }
+ 
+
     },
     { timestamp: true }
 );

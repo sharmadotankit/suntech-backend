@@ -244,7 +244,8 @@ const getClientById = async (req, res) => {
 
 const getOfferCodeForNewOffer = async (req, res) => {
     try {
-        const highestOffer = await OfferLetterModel.findOne().sort({ offerCodeNumber: -1 }).limit(1);
+        let companyId = req.params.companyId;
+        const highestOffer = await OfferLetterModel.findOne({companyId}).sort({ offerCodeNumber: -1 }).limit(1);
         let maxOfferCode = 1;
         if (highestOffer) {
             maxOfferCode = highestOffer.offerCodeNumber + 1;
@@ -274,8 +275,6 @@ const createUpdateOffer = async (req, res) => {
         delete offerData._id;
         let offerResponse;
         if(offerId){
-            console.log('came her0',offerId)
-            console.log('offerData',offerData)
             offerResponse = await OfferLetterModel.findByIdAndUpdate(offerId,offerData);
         }else{
             offerResponse= await OfferLetterModel.create(offerData);

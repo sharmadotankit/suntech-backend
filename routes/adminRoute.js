@@ -30,7 +30,7 @@ router.get('/client-code', authMiddleWare.checkIfAdmin, adminController.getClien
 router.post('/create-update-client', authMiddleWare.checkIfAdmin, upload.array("clientDocuments"), adminController.createUpdateClient)
 router.get('/clients', authMiddleWare.checkIfValidUser, adminController.fetchClientsForCompany)
 router.get('/client/:clientId', authMiddleWare.checkIfAdmin, adminController.getClientById)
-router.get('/offer-code', authMiddleWare.checkIfAdmin, adminController.getOfferCodeForNewOffer)
+router.get('/offer-code/:companyId', authMiddleWare.checkIfAdmin, adminController.getOfferCodeForNewOffer)
 router.post('/create-update-offer', authMiddleWare.checkIfAdmin, adminController.createUpdateOffer)
 router.get('/offers', authMiddleWare.checkIfValidUser, adminController.fetchOfferForCompany)
 router.get('/offer/:offerId', authMiddleWare.checkIfAdmin, adminController.getOfferById)
