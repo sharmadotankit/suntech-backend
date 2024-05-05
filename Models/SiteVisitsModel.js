@@ -57,9 +57,6 @@ const SiteVisitSchema = new Schema(
                 location: { type: String },
                 etag: { type: String },
             },
-            description: {
-                type: String,
-            }
         }],
     },
     { timestamp: true }
