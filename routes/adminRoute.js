@@ -34,5 +34,7 @@ router.get('/offer-code/:companyId', authMiddleWare.checkIfAdmin, adminControlle
 router.post('/create-update-offer', authMiddleWare.checkIfAdmin, adminController.createUpdateOffer)
 router.get('/offers', authMiddleWare.checkIfValidUser, adminController.fetchOfferForCompany)
 router.get('/offer/:offerId', authMiddleWare.checkIfAdmin, adminController.getOfferById)
+router.post('/create-update-project', authMiddleWare.checkIfAdmin, upload.array("attachedDocumentFile"), adminController.createUpdateProject)
+router.get('/projects', authMiddleWare.checkIfValidUser, adminController.fetchProjectsForCompany)
 
 module.exports = router;
