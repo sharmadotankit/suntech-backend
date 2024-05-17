@@ -685,33 +685,25 @@ const fetchProjectsForCompany = async (req, res) => {
         let projectResponse = await ProjectModel.aggregate([
           {
             $match: {
-              comapnnyId: mongoose.Types.ObjectId(companyId),
+              companyId: new mongoose.Types.ObjectId(companyId),
             },
           },
           {
             $lookup: {
-              from: "projects",
-              localFields: "projectId",
+              from: "clients",
+              localField: "clientId",
               foreignField: "_id",
-              as: "projectId",
+              as: "clientId",
             },
           },
           {
-            $unwind: "$projectId",
-          },
-          {
-            $lookup: {
-              from: "projects",
-              localFields: "_id",
-              foreignField: "projectId",
-              as: "project",
-            },
+            $unwind: "$clientId",
           },
           {
             $match: {
               $or: [
                 {
-                  "project.projectCode": {
+                  "client.clientName": {
                     $regex: clientNameFilter,
                     $options: "i",
                   },
@@ -722,23 +714,23 @@ const fetchProjectsForCompany = async (req, res) => {
           {
             $project: {
               _id: 1,
-              "clientId.clientName": 1,
+              // "clientId.clientName": 1,
               "clientId._id": 1,
-              offerId:1,
+              // offerId:1,
               projectCode: 1,
-              isActive: 1,
-              projectType: 1,
-              orderDate: 1,
+              // isActive: 1,
+              // projectType: 1,
+              // orderDate: 1,
               orderValue: 1,
-              shortDescription: 1,
-              longDescription: 1,
-              projectCorrespondence: 1,
+              // shortDescription: 1,
+              // longDescription: 1,
+              // projectCorrespondence: 1,
               siteLocation: 1,
-              mapLocations: 1,
+              // mapLocations: 1,
               gstNo: 1,
               billToAddress: 1,
               shipToAddress: 1,
-              attachedDocument: 1,
+              // attachedDocument: 1,
 
             },
           },
@@ -748,6 +740,8 @@ const fetchProjectsForCompany = async (req, res) => {
             },
           },
         ]);
+
+      console.log("projectResponse", projectResponse);
 
         if (createdFrom) {
           projectResponse = projectResponse.filter((offerItem) =>
