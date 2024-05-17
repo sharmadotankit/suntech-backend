@@ -699,38 +699,28 @@ const fetchProjectsForCompany = async (req, res) => {
           {
             $unwind: "$clientId",
           },
-          {
-            $match: {
-              $or: [
-                {
-                  "client.clientName": {
-                    $regex: clientNameFilter,
-                    $options: "i",
-                  },
-                },
-              ],
-            },
-          },
+          // {
+          //   $match: {
+          //     $or: [
+          //       {
+          //         "client.clientName": {
+          //           $regex: clientNameFilter,
+          //           $options: "i",
+          //         },
+          //       },
+          //     ],
+          //   },
+          // },
           {
             $project: {
               _id: 1,
-              // "clientId.clientName": 1,
               "clientId._id": 1,
-              // offerId:1,
               projectCode: 1,
-              // isActive: 1,
-              // projectType: 1,
-              // orderDate: 1,
               orderValue: 1,
-              // shortDescription: 1,
-              // longDescription: 1,
-              // projectCorrespondence: 1,
               siteLocation: 1,
-              // mapLocations: 1,
               gstNo: 1,
               billToAddress: 1,
               shipToAddress: 1,
-              // attachedDocument: 1,
 
             },
           },
@@ -740,8 +730,6 @@ const fetchProjectsForCompany = async (req, res) => {
             },
           },
         ]);
-
-      console.log("projectResponse", projectResponse);
 
         if (createdFrom) {
           projectResponse = projectResponse.filter((offerItem) =>
@@ -774,7 +762,7 @@ const fetchProjectsForCompany = async (req, res) => {
     catch(err){
       console.log(err);
     }
-}
+};
 
 module.exports = {
   getCompanyData,
