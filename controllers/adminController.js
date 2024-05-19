@@ -2,6 +2,7 @@ const CompanyModel = require("../Models/CompanyModel");
 const ClientModel = require("../Models/ClientModel");
 const ProjectModel = require("../Models/ProjectModel");
 const OfferLetterModel = require("../Models/OfferModel");
+const InvoiceModel = require("../Models/InvoiceModel");
 const { default: mongoose } = require("mongoose");
 const moment = require("moment");
 
@@ -246,6 +247,37 @@ const getClientById = async (req, res) => {
   }
 };
 
+const getProjectById = async (req, res) => {
+  try {
+    let projectId = req.params.projectId;
+    let projectResponse = await ProjectModel.findById(projectId);
+console.log("projectResponse", projectResponse);
+    if (!projectResponse) {
+      res.status(400).json({
+        status: false,
+        statusCode: 400,
+        message: "Project not found",
+        data: null,
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "Fetch project Successful",
+      data: projectResponse,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: false,
+      statusCode: 400,
+      message: err.message,
+      error: err,
+    });
+  }
+};
+
 const getOfferCodeForNewOffer = async (req, res) => {
   try {
     let companyId = req.params.companyId;
@@ -382,6 +414,7 @@ const fetchOfferForCompany = async (req, res) => {
           "clientId._id": 1,
           offerDate: 1,
           offerTotal: 1,
+          offerTotal:1,
         },
       },
       {
@@ -481,10 +514,30 @@ const createUpdateAssociate = async (req, res) => {
 
 const createUpdateInvoice = async (req, res) => {
   try {
+    let invoiceData = req.body;
+    console.log("invoiceData", invoiceData);
+    let invoiceId = invoiceData._id;
+    delete invoiceData._id;
+    let invoiceResponse;
+    if (invoiceId) {
+      invoiceResponse = await InvoiceModel.findByIdAndUpdate(invoiceId, invoiceData, { new: true });
+    } else {
+      invoiceResponse = await InvoiceModel.create(invoiceData);
+    }
+
+    if (!invoiceResponse) {
+      res.status(400).json({
+        status: false,
+        statusCode: 400,
+        message: "Invoice not found",
+        data: null,
+      });
+      return;
+    }
     res.status(200).json({
       status: true,
       statusCode: 200,
-      message: "Created client successfully",
+      message: "Created invoice successfully",
       data: null,
     });
   } catch (err) {
@@ -699,18 +752,18 @@ const fetchProjectsForCompany = async (req, res) => {
           {
             $unwind: "$clientId",
           },
-          // {
-          //   $match: {
-          //     $or: [
-          //       {
-          //         "client.clientName": {
-          //           $regex: clientNameFilter,
-          //           $options: "i",
-          //         },
-          //       },
-          //     ],
-          //   },
-          // },
+          {
+            $match: {
+              $or: [
+                {
+                  "clientId.clientName": {
+                    $regex: clientNameFilter,
+                    $options: "i",
+                  },
+                },
+              ],
+            },
+          },
           {
             $project: {
               _id: 1,
@@ -783,4 +836,5 @@ module.exports = {
   createUpdateLeaveRecord,
   getOfferById,
   fetchProjectsForCompany,
+  getProjectById,
 };

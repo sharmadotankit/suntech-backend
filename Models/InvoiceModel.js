@@ -18,9 +18,12 @@ const InvoiceSchema = new Schema(
             ref: 'projects',
             required:true,
         },
+        invoiceType:{type:String, required:true},
         invoiceDate:{type:Date, required:true},
         gstNo:{type:String,required:true},
         totalFees:{type:Number, required:true},
+        total:{type:Number, required:true},
+        taxableValue:{type:Number, required:true},
         feesBreakup:[{
             lineDescription:{type:String,required:true},
             percentValue:{type:Number, required:true},
@@ -30,6 +33,7 @@ const InvoiceSchema = new Schema(
             taxType:{type:String, required:true},
             taxValue:{type:Number,required:true},
         },
+        taxAmount:{type:Number, required:true},
         netTotal:{type:String, required:true},
     },
     { timestamp: true }
