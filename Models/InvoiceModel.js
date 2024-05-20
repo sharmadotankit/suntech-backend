@@ -34,7 +34,7 @@ const InvoiceSchema = new Schema(
             taxValue:{type:Number,required:true},
         },
         taxAmount:{type:Number, required:true},
-        netTotal:{type:String, required:true},
+        netTotal:{type:Number, required:true},
     },
     { timestamp: true }
 );
