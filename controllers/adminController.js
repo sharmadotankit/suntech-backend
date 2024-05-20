@@ -251,7 +251,6 @@ const getProjectById = async (req, res) => {
   try {
     let projectId = req.params.projectId;
     let projectResponse = await ProjectModel.findById(projectId);
-console.log("projectResponse", projectResponse);
     if (!projectResponse) {
       res.status(400).json({
         status: false,
@@ -277,6 +276,38 @@ console.log("projectResponse", projectResponse);
     });
   }
 };
+
+const getInvoiceById = async (req, res) => {
+  try {
+    let invoiceId = req.params.invoiceId;
+    let invoiceResponse = await InvoiceModel.findById(invoiceId);
+    console.log("invoiceResponse", invoiceResponse);
+
+    if (!invoiceResponse) {
+      res.status(400).json({
+        status: false,
+        statusCode: 400,
+        message: "Invoice not found",
+        data: null,
+      });
+      return;
+    } 
+
+    res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "Fetch invoice Successful",
+      data: invoiceResponse,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: false,
+      statusCode: 400,
+      message: err.message,
+      error: err,
+    });
+  }
+}
 
 const getOfferCodeForNewOffer = async (req, res) => {
   try {
@@ -518,6 +549,7 @@ const createUpdateInvoice = async (req, res) => {
     console.log("invoiceData", invoiceData);
     let invoiceId = invoiceData._id;
     delete invoiceData._id;
+    delete invoiceData.__v;
     let invoiceResponse;
     if (invoiceId) {
       invoiceResponse = await InvoiceModel.findByIdAndUpdate(invoiceId, invoiceData, { new: true });
@@ -837,4 +869,5 @@ module.exports = {
   getOfferById,
   fetchProjectsForCompany,
   getProjectById,
+  getInvoiceById,
 };

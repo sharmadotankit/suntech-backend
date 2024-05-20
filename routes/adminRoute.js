@@ -38,5 +38,6 @@ router.post('/create-update-project', authMiddleWare.checkIfAdmin, upload.array(
 router.get('/projects', authMiddleWare.checkIfValidUser, adminController.fetchProjectsForCompany)
 router.get('/project/:projectId', authMiddleWare.checkIfAdmin, adminController.getProjectById)
 router.post('/create-update-invoice', authMiddleWare.checkIfAdmin, adminController.createUpdateInvoice)
+router.get('/invoice/:invoiceId', authMiddleWare.checkIfAdmin, adminController.getInvoiceById)
 
 module.exports = router;
