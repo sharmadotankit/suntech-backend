@@ -281,7 +281,6 @@ const getInvoiceById = async (req, res) => {
   try {
     let invoiceId = req.params.invoiceId;
     let invoiceResponse = await InvoiceModel.findById(invoiceId);
-    console.log("invoiceResponse", invoiceResponse);
 
     if (!invoiceResponse) {
       res.status(400).json({
@@ -546,7 +545,6 @@ const createUpdateAssociate = async (req, res) => {
 const createUpdateInvoice = async (req, res) => {
   try {
     let invoiceData = req.body;
-    console.log("invoiceData", invoiceData);
     let invoiceId = invoiceData._id;
     delete invoiceData._id;
     delete invoiceData.__v;
@@ -694,7 +692,6 @@ const createUpdateProject = async (req, res) => {
       shipToAddress,
       attachedDocument
     };
-    // console.log("dataToInsert", dataToInsert);
     let projectResponse;
     if (_id) {
       projectResponse = await ProjectModel.findByIdAndUpdate(
@@ -704,7 +701,6 @@ const createUpdateProject = async (req, res) => {
       );
     } else {
       projectResponse = await ProjectModel.create(dataToInsert);
-      // console.log("came here",projectResponse );
     }
 
     if (!projectResponse) {
@@ -800,13 +796,17 @@ const fetchProjectsForCompany = async (req, res) => {
             $project: {
               _id: 1,
               "clientId._id": 1,
+              "clientId.clientName": 1,
+              orderDate: 1,
+              attachedDocument: 1,
               projectCode: 1,
+              projectType: 1,
+              shortDescription: 1,
               orderValue: 1,
               siteLocation: 1,
               gstNo: 1,
               billToAddress: 1,
               shipToAddress: 1,
-
             },
           },
           {
@@ -815,7 +815,7 @@ const fetchProjectsForCompany = async (req, res) => {
             },
           },
         ]);
-
+console.log("created from", createdTo,createdFrom)
         if (createdFrom) {
           projectResponse = projectResponse.filter((offerItem) =>
             moment(offerItem.offerDate).isSameOrAfter(moment(createdFrom))
