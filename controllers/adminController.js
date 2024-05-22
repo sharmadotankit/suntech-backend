@@ -290,7 +290,7 @@ const getInvoiceById = async (req, res) => {
         data: null,
       });
       return;
-    } 
+    }
 
     res.status(200).json({
       status: true,
@@ -306,7 +306,7 @@ const getInvoiceById = async (req, res) => {
       error: err,
     });
   }
-}
+};
 
 const getOfferCodeForNewOffer = async (req, res) => {
   try {
@@ -444,7 +444,7 @@ const fetchOfferForCompany = async (req, res) => {
           "clientId._id": 1,
           offerDate: 1,
           offerTotal: 1,
-          offerTotal:1,
+          offerTotal: 1,
         },
       },
       {
@@ -550,7 +550,11 @@ const createUpdateInvoice = async (req, res) => {
     delete invoiceData.__v;
     let invoiceResponse;
     if (invoiceId) {
-      invoiceResponse = await InvoiceModel.findByIdAndUpdate(invoiceId, invoiceData, { new: true });
+      invoiceResponse = await InvoiceModel.findByIdAndUpdate(
+        invoiceId,
+        invoiceData,
+        { new: true }
+      );
     } else {
       invoiceResponse = await InvoiceModel.create(invoiceData);
     }
@@ -640,7 +644,6 @@ const createUpdateSiteVisits = async (req, res) => {
 
 const createUpdateProject = async (req, res) => {
   try {
-    
     let files = req.files;
     let {
       _id,
@@ -660,9 +663,9 @@ const createUpdateProject = async (req, res) => {
       gstNo,
       billToAddress,
       shipToAddress,
-      attachedDocumentData
+      attachedDocumentData,
     } = req.body;
-   
+
     attachedDocumentData.files = files[0];
     billToAddress = JSON.parse(billToAddress);
     shipToAddress = JSON.parse(shipToAddress);
@@ -671,8 +674,8 @@ const createUpdateProject = async (req, res) => {
     mapLocations = JSON.parse(mapLocations);
     let attachedDocument = {
       file: files[0],
-      description: attachedDocumentData.description
-    }
+      description: attachedDocumentData.description,
+    };
     let dataToInsert = {
       companyId,
       clientId,
@@ -690,7 +693,7 @@ const createUpdateProject = async (req, res) => {
       gstNo,
       billToAddress,
       shipToAddress,
-      attachedDocument
+      attachedDocument,
     };
     let projectResponse;
     if (_id) {
@@ -720,7 +723,6 @@ const createUpdateProject = async (req, res) => {
       data: projectResponse,
     });
     return res;
-
   } catch (err) {
     console.log("err", err);
     res.status(400).json({
@@ -752,101 +754,144 @@ const createUpdateLeaveRecord = async (req, res) => {
 };
 
 const fetchProjectsForCompany = async (req, res) => {
-    try{
-        const {
-          createdFrom,
-          createdTo,
-          companyId,
-          sortField,
-          sortOrder,
-          clientNameFilter,
-          projectNumberFilter,
-        } = req.query;
+  try {
+    const {
+      createdFrom,
+      createdTo,
+      companyId,
+      sortField,
+      sortOrder,
+      clientNameFilter,
+      projectNumberFilter,
+      locationFilter,
+      projectTypeFilter,
+      projectStatusFilter,
+    } = req.query;
 
-        let projectResponse = await ProjectModel.aggregate([
-          {
-            $match: {
-              companyId: new mongoose.Types.ObjectId(companyId),
-            },
+    let matchConditions = {
+      companyId: new mongoose.Types.ObjectId(companyId),
+    };
+
+    if (clientNameFilter || projectNumberFilter || locationFilter || projectTypeFilter) {
+      matchConditions.$or = [];
+
+      if (clientNameFilter) {
+        matchConditions.$or.push({
+          "clientId.clientName": {
+            $regex: clientNameFilter,
+            $options: "i",
           },
-          {
-            $lookup: {
-              from: "clients",
-              localField: "clientId",
-              foreignField: "_id",
-              as: "clientId",
-            },
-          },
-          {
-            $unwind: "$clientId",
-          },
-          {
-            $match: {
-              $or: [
-                {
-                  "clientId.clientName": {
-                    $regex: clientNameFilter,
-                    $options: "i",
-                  },
-                },
-              ],
-            },
-          },
-          {
-            $project: {
-              _id: 1,
-              "clientId._id": 1,
-              "clientId.clientName": 1,
-              orderDate: 1,
-              attachedDocument: 1,
-              projectCode: 1,
-              projectType: 1,
-              shortDescription: 1,
-              orderValue: 1,
-              siteLocation: 1,
-              gstNo: 1,
-              billToAddress: 1,
-              shipToAddress: 1,
-            },
-          },
-          {
-            $sort: {
-              [sortField]: sortOrder === "asc" ? 1 : -1,
-            },
-          },
-        ]);
-console.log("created from", createdTo,createdFrom)
-        if (createdFrom) {
-          projectResponse = projectResponse.filter((offerItem) =>
-            moment(offerItem.offerDate).isSameOrAfter(moment(createdFrom))
-          );
-        }
-    
-        if (createdTo) {
-          projectResponse = projectResponse.filter((offerItem) =>
-            moment(offerItem.offerDate).isSameOrBefore(moment(createdTo))
-          );
-        }
-    
-        if (!projectResponse) {
-          res.status(400).json({
-            status: false,
-            statusCode: 400,
-            message: "No Project found",
-            data: null,
-          });
-          return;
-        }
-        res.status(200).json({
-          status: true,
-          statusCode: 200,
-          data: projectResponse,
-          message: "Fetch projects Successful",
         });
+      }
+
+      if (projectNumberFilter) {
+        matchConditions.$or.push({
+          projectCode: {
+            $regex: projectNumberFilter,
+            $options: "i",
+          },
+        });
+      }
+
+      if (locationFilter) {
+        matchConditions.$or.push({
+          siteLocation: {
+            $regex: locationFilter,
+            $options: "i",
+          },
+        });
+      }
+
+      if (projectTypeFilter) {
+        matchConditions.$or.push({
+          projectType: {
+            $regex: projectTypeFilter,
+            $options: "i",
+          },
+        });
+      }
     }
-    catch(err){
-      console.log(err);
+
+    if (projectStatusFilter !== undefined) {
+      matchConditions.isActive = projectStatusFilter === "true";
+  }
+
+    let projectResponse = await ProjectModel.aggregate([
+      {
+        $match: matchConditions,
+      },
+      {
+        $lookup: {
+          from: "clients",
+          localField: "clientId",
+          foreignField: "_id",
+          as: "clientId",
+        },
+      },
+      {
+        $unwind: "$clientId",
+      },
+      {
+        $project: {
+          _id: 1,
+          "clientId._id": 1,
+          "clientId.clientName": 1,
+          orderDate: 1,
+          attachedDocument: 1,
+          projectCode: 1,
+          projectType: 1,
+          shortDescription: 1,
+          orderValue: 1,
+          siteLocation: 1,
+          gstNo: 1,
+          billToAddress: 1,
+          shipToAddress: 1,
+        },
+      },
+      {
+        $sort: {
+          [sortField]: sortOrder === "asc" ? 1 : -1,
+        },
+      },
+    ]);
+
+    if (createdFrom) {
+      projectResponse = projectResponse.filter((orderItem) =>
+        moment(orderItem.orderDate).isSameOrAfter(moment(createdFrom))
+      );
     }
+
+    if (createdTo) {
+      projectResponse = projectResponse.filter((orderItem) =>
+        moment(orderItem.orderDate).isSameOrBefore(moment(createdTo))
+      );
+    }
+
+    if (!projectResponse.length) {
+      res.status(400).json({
+        status: false,
+        statusCode: 400,
+        message: "No Project found",
+        data: null,
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      statusCode: 200,
+      data: projectResponse,
+      message: "Fetch projects Successful",
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      status: false,
+      statusCode: 500,
+      message: "Internal Server Error",
+      data: null,
+    });
+  }
 };
 
 const fetchInvoiceForCompany = async (req, res) => {
