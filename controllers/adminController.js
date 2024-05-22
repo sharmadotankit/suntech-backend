@@ -849,6 +849,116 @@ console.log("created from", createdTo,createdFrom)
     }
 };
 
+const fetchInvoiceForCompany = async (req, res) => {
+    try{
+        const {
+          createdFrom,
+          createdTo,
+          companyId,
+          sortField,
+          sortOrder,
+          clientNameFilter,
+          projectNumberFilter,
+        } = req.query;
+
+        let invoiceResponse = await InvoiceModel.aggregate([
+          {
+            $match: {
+              companyId: new mongoose.Types.ObjectId(companyId),
+            },
+          },
+          {
+            $lookup: {
+              from: "clients",
+              localField: "clientId",
+              foreignField: "_id",
+              as: "clientId",
+            },
+          },
+          {
+            $unwind: "$clientId",
+          },
+          {
+            $lookup: {
+              from: "projects",
+              localField: "projectId",
+              foreignField: "_id",
+              as: "projectId",
+            },
+          },
+          {
+            $unwind: "$projectId",
+          },
+          {
+            $match: {
+              $or: [
+                {
+                  "clientId.clientName": {
+                    $regex: clientNameFilter,
+                    $options: "i",
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              "clientId._id": 1,
+              "clientId.clientName": 1,
+              "projectId._id": 1,
+              "projectId.projectCode": 1,
+              "projectId.shortDescription": 1,
+              invoiceType: 1,
+              invoiceDate: 1,
+              gstNo: 1,
+              totalFees: 1,
+              tax: 1,
+              netTotal: 1,
+             
+            },
+          },
+          {
+            $sort: {
+              [sortField]: sortOrder === "asc" ? 1 : -1,
+            },
+          },
+        ]);
+            console.log("created from", createdTo,createdFrom)
+        if (createdFrom) {
+          invoiceResponse = invoiceResponse.filter((offerItem) =>
+            moment(offerItem.invoiceDate).isSameOrAfter(moment(createdFrom))
+          );
+        }
+    
+        if (createdTo) {
+          invoiceResponse = invoiceResponse.filter((offerItem) =>
+            moment(offerItem.invoiceDate).isSameOrBefore(moment(createdTo))
+          );
+        }
+    
+        if (!invoiceResponse) {
+          res.status(400).json({
+            status: false,
+            statusCode: 400,
+            message: "No Project found",
+            data: null,
+          });
+          return;
+        }
+        res.status(200).json({
+          status: true,
+          statusCode: 200,
+          data: invoiceResponse,
+          message: "Fetch invoice Response Successful",
+        });
+    }
+    catch(err){
+      console.log(err);
+    }
+};
+
+
 module.exports = {
   getCompanyData,
   updateCompany,
@@ -870,4 +980,5 @@ module.exports = {
   fetchProjectsForCompany,
   getProjectById,
   getInvoiceById,
+  fetchInvoiceForCompany
 };
