@@ -895,113 +895,167 @@ const fetchProjectsForCompany = async (req, res) => {
 };
 
 const fetchInvoiceForCompany = async (req, res) => {
-    try{
+    try {
         const {
-          createdFrom,
-          createdTo,
-          companyId,
-          sortField,
-          sortOrder,
-          clientNameFilter,
-          projectNumberFilter,
+            createdFrom,
+            createdTo,
+            companyId,
+            sortField,
+            sortOrder,
+            clientNameFilter,
+            projectNumberFilter,
+            locationFilter,
+            projectTypeFilter,
+            projectStatusFilter,
+            invoiceTypeFilter
         } = req.query;
 
+        let matchConditions = {
+            companyId: new mongoose.Types.ObjectId(companyId),
+        };
+
+console.log("Received query parameters:", req.query);
+        if (clientNameFilter || projectNumberFilter || locationFilter || projectTypeFilter || invoiceTypeFilter) {
+            matchConditions.$or = [];
+
+            if (clientNameFilter) {
+                matchConditions.$or.push({
+                    "clientId.clientName": {
+                        $regex: clientNameFilter,
+                        $options: "i",
+                    },
+                });
+            }
+
+            if (projectNumberFilter) {
+                matchConditions.$or.push({
+                    "projectId.projectCode": {
+                        $regex: projectNumberFilter,
+                        $options: "i",
+                    },
+                });
+            }
+
+            if (locationFilter) {
+                matchConditions.$or.push({
+                    siteLocation: {
+                        $regex: locationFilter,
+                        $options: "i",
+                    },
+                });
+            }
+
+            if (projectTypeFilter) {
+                matchConditions.$or.push({
+                    "projectId.projectType": {
+                        $regex: projectTypeFilter,
+                        $options: "i",
+                    },
+                });
+            }
+
+            if (invoiceTypeFilter) {
+                matchConditions.$or.push({
+                    invoiceType: {
+                        $regex: invoiceTypeFilter,
+                        $options: "i",
+                    },
+                });
+            }
+        }
+
+        if (projectStatusFilter !== undefined) {
+            matchConditions.isActive = projectStatusFilter === "true";
+        }
+
         let invoiceResponse = await InvoiceModel.aggregate([
-          {
-            $match: {
-              companyId: new mongoose.Types.ObjectId(companyId),
+            {
+                $match: matchConditions,
             },
-          },
-          {
-            $lookup: {
-              from: "clients",
-              localField: "clientId",
-              foreignField: "_id",
-              as: "clientId",
-            },
-          },
-          {
-            $unwind: "$clientId",
-          },
-          {
-            $lookup: {
-              from: "projects",
-              localField: "projectId",
-              foreignField: "_id",
-              as: "projectId",
-            },
-          },
-          {
-            $unwind: "$projectId",
-          },
-          {
-            $match: {
-              $or: [
-                {
-                  "clientId.clientName": {
-                    $regex: clientNameFilter,
-                    $options: "i",
-                  },
+            {
+                $lookup: {
+                    from: "clients",
+                    localField: "clientId",
+                    foreignField: "_id",
+                    as: "clientId",
                 },
-              ],
             },
-          },
-          {
-            $project: {
-              _id: 1,
-              "clientId._id": 1,
-              "clientId.clientName": 1,
-              "projectId._id": 1,
-              "projectId.projectCode": 1,
-              "projectId.shortDescription": 1,
-              invoiceType: 1,
-              invoiceDate: 1,
-              gstNo: 1,
-              totalFees: 1,
-              tax: 1,
-              netTotal: 1,
-             
+            {
+                $unwind: "$clientId",
             },
-          },
-          {
-            $sort: {
-              [sortField]: sortOrder === "asc" ? 1 : -1,
+            {
+                $lookup: {
+                    from: "projects",
+                    localField: "projectId",
+                    foreignField: "_id",
+                    as: "projectId",
+                },
             },
-          },
+            {
+                $unwind: "$projectId",
+            },
+            {
+                $project: {
+                    _id: 1,
+                    "clientId._id": 1,
+                    "clientId.clientName": 1,
+                    "projectId._id": 1,
+                    "projectId.projectCode": 1,
+                    "projectId.shortDescription": 1,
+                    invoiceType: 1,
+                    invoiceDate: 1,
+                    gstNo: 1,
+                    totalFees: 1,
+                    tax: 1,
+                    netTotal: 1,
+                },
+            },
+            {
+                $sort: {
+                    [sortField]: sortOrder === "asc" ? 1 : -1,
+                },
+            },
         ]);
-            console.log("created from", createdTo,createdFrom)
+
         if (createdFrom) {
-          invoiceResponse = invoiceResponse.filter((offerItem) =>
-            moment(offerItem.invoiceDate).isSameOrAfter(moment(createdFrom))
-          );
+            invoiceResponse = invoiceResponse.filter((offerItem) =>
+                moment(offerItem.invoiceDate).isSameOrAfter(moment(createdFrom))
+            );
         }
-    
+
         if (createdTo) {
-          invoiceResponse = invoiceResponse.filter((offerItem) =>
-            moment(offerItem.invoiceDate).isSameOrBefore(moment(createdTo))
-          );
+            invoiceResponse = invoiceResponse.filter((offerItem) =>
+                moment(offerItem.invoiceDate).isSameOrBefore(moment(createdTo))
+            );
         }
-    
-        if (!invoiceResponse) {
-          res.status(400).json({
-            status: false,
-            statusCode: 400,
-            message: "No Project found",
-            data: null,
-          });
-          return;
+
+        if (!invoiceResponse.length) {
+            res.status(400).json({
+                status: false,
+                statusCode: 400,
+                message: "No Invoice found",
+                data: null,
+            });
+            return;
         }
+
         res.status(200).json({
-          status: true,
-          statusCode: 200,
-          data: invoiceResponse,
-          message: "Fetch invoice Response Successful",
+            status: true,
+            statusCode: 200,
+            data: invoiceResponse,
+            message: "Fetch invoice Response Successful",
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            status: false,
+            statusCode: 500,
+            message: "Internal Server Error",
+            data: null,
         });
     }
-    catch(err){
-      console.log(err);
-    }
 };
+
 
 
 module.exports = {
