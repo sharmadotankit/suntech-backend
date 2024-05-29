@@ -21,7 +21,7 @@ const ProjectSchema = new Schema(
         projectCode:{type:String,required:true},
         //projectNumber:{type:String,required:false},
         isActive:{type:Boolean,default:true},
-        projectType:{type:String, required:true},
+        projectType:[{type:String, required:true}],
         orderDate:{type:Date, required:true},
         orderValue:{type:Number, required:true},
         shortDescription:{type:String, required:true},
