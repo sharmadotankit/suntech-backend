@@ -783,14 +783,14 @@ const fetchProjectsForCompany = async (req, res) => {
 
     let orConditions = [];
 
-    if (clientNameFilter) {
-      orConditions.push({
-        "clientId.clientName": {
-          $regex: clientNameFilter,
-          $options: "i",
-        },
-      });
-    }
+    // if (clientNameFilter) {
+    //   orConditions.push({
+    //     "clientId.clientName": {
+    //       $regex: clientNameFilter,
+    //       $options: "i",
+    //     },
+    //   });
+    // }
 
     if (projectNumberFilter) {
       orConditions.push({
@@ -864,6 +864,13 @@ const fetchProjectsForCompany = async (req, res) => {
         },
       },
     ]);
+
+
+    if(clientNameFilter){
+      projectResponse = projectResponse.filter((orderItem) =>
+        orderItem.clientId.clientName.toLowerCase().includes(clientNameFilter.toLowerCase())
+      );
+    }
 
     if (createdFrom) {
       projectResponse = projectResponse.filter((orderItem) =>
