@@ -769,24 +769,24 @@ const fetchProjectsForCompany = async (req, res) => {
       projectStatusFilter,
     } = req.query;
 
-console.log("req.query", req.query);
+    console.log("req.query", req.query);
     // Ensure projectTypeFilter is an array
     const projectTypeArray = Array.isArray(projectTypeFilter)
       ? projectTypeFilter
-      : projectTypeFilter.length 
-      ? [projectTypeFilter] 
+      : projectTypeFilter.length
+      ? [projectTypeFilter]
       : [];
 
     const projectNumberArray = Array.isArray(projectNumberFilter)
       ? projectNumberFilter
-      : projectNumberFilter.length 
-      ? [projectNumberFilter] 
+      : projectNumberFilter.length
+      ? [projectNumberFilter]
       : [];
 
-      const clientNameArray = Array.isArray(clientNameFilter)
+    const clientNameArray = Array.isArray(clientNameFilter)
       ? clientNameFilter
-      : clientNameFilter.length 
-      ? [clientNameFilter] 
+      : clientNameFilter.length
+      ? [clientNameFilter]
       : [];
 
     let matchConditions = {
@@ -808,7 +808,6 @@ console.log("req.query", req.query);
       orConditions.push({
         projectCode: {
           $in: projectNumberArray,
-          // $options: "i",
         },
       });
     }
@@ -877,8 +876,7 @@ console.log("req.query", req.query);
       },
     ]);
 
-
-    if(clientNameArray.length){
+    if (clientNameArray.length) {
       projectResponse = projectResponse.filter((orderItem) =>
         orderItem.clientId.clientName.includes(clientNameArray)
       );
@@ -913,7 +911,7 @@ console.log("req.query", req.query);
       message: "Fetch projects Successful",
     });
   } catch (err) {
-    console.log("hasvcjvsckahbsv",err);
+    console.log("hasvcjvsckahbsv", err);
     res.status(500).json({
       status: false,
       statusCode: 500,
@@ -937,24 +935,24 @@ const fetchInvoiceForCompany = async (req, res) => {
       locationFilter,
       invoiceTypeFilter,
     } = req.query;
-console.log("req.query", req.query);
+    console.log("req.query", req.query);
     const projectTypeArray = Array.isArray(projectTypeFilter)
       ? projectTypeFilter
       : projectTypeFilter.length
       ? [projectTypeFilter]
       : [];
 
-      const projectNumberArray = Array.isArray(projectNumberFilter)
+    const projectNumberArray = Array.isArray(projectNumberFilter)
       ? projectNumberFilter
-      : projectNumberFilter.length 
-      ? [projectNumberFilter] 
+      : projectNumberFilter.length
+      ? [projectNumberFilter]
       : [];
 
-console.log("projectNumberArray", projectNumberArray);
-      const clientNameArray = Array.isArray(clientNameFilter)
+    console.log("projectNumberArray", projectNumberArray);
+    const clientNameArray = Array.isArray(clientNameFilter)
       ? clientNameFilter
-      : clientNameFilter.length 
-      ? [clientNameFilter] 
+      : clientNameFilter.length
+      ? [clientNameFilter]
       : [];
 
     let matchConditions = {
@@ -990,7 +988,7 @@ console.log("projectNumberArray", projectNumberArray);
     //       $options: "i",
     //     },
     //   });
-   // }
+    // }
 
     // if (projectTypeArray.length) {
     //   orConditions.push({
@@ -1063,36 +1061,36 @@ console.log("projectNumberArray", projectNumberArray);
         },
       },
     ]);
-console.log("response invoice after lookup", invoiceResponse);
-    if(clientNameArray.length){
+    console.log("response invoice after lookup", invoiceResponse);
+    if (clientNameArray.length) {
       invoiceResponse = invoiceResponse.filter((orderItem) =>
         orderItem.clientId.clientName.includes(clientNameArray)
       );
     }
 
-    if(projectNumberArray.length){
+    if (projectNumberArray.length) {
       invoiceResponse = invoiceResponse.filter((orderItem) =>
         orderItem.projectId.projectCode.includes(projectNumberArray)
       );
     }
 
-    if(projectTypeArray.length){
+    if (projectTypeArray.length) {
       invoiceResponse = invoiceResponse.filter((orderItem) =>
-        orderItem.projectId.projectType.includes(projectTypeArray)  
-    );
-  }
-console.log("invoiceResponse before location", invoiceResponse);
-  if(locationFilter){
-    invoiceResponse = invoiceResponse.filter((orderItem) =>
-      orderItem.projectId.siteLocation.includes(locationFilter)  
-  );
-}
+        orderItem.projectId.projectType.includes(projectTypeArray)
+      );
+    }
+    console.log("invoiceResponse before location", invoiceResponse);
+    if (locationFilter) {
+      invoiceResponse = invoiceResponse.filter((orderItem) =>
+        orderItem.projectId.siteLocation.includes(locationFilter)
+      );
+    }
 
-if(invoiceTypeFilter){
-  invoiceResponse = invoiceResponse.filter((orderItem) =>
-    orderItem.invoiceType.includes(invoiceTypeFilter)  
-);
-}
+    if (invoiceTypeFilter) {
+      invoiceResponse = invoiceResponse.filter((orderItem) =>
+        orderItem.invoiceType.includes(invoiceTypeFilter)
+      );
+    }
 
     if (createdFrom) {
       invoiceResponse = invoiceResponse.filter((offerItem) =>
@@ -1135,13 +1133,13 @@ if(invoiceTypeFilter){
 
 const getProjectFilters = async (req, res) => {
   try {
-    console.log("came hererrererererererererererere")
+    console.log("came hererrererererererererererere");
     const { companyId } = req.query;
     const response = await ProjectModel.aggregate([
       {
-        $match:{
-          companyId: new mongoose.Types.ObjectId(companyId)
-        }
+        $match: {
+          companyId: new mongoose.Types.ObjectId(companyId),
+        },
       },
       {
         $lookup: {
@@ -1159,18 +1157,18 @@ const getProjectFilters = async (req, res) => {
           _id: 1,
           "clientId._id": 1,
           "clientId.clientName": 1,
-          projectCode:1,
-        }
+          projectCode: 1,
+        },
       },
     ]);
 
-    if(!response){
+    if (!response) {
       res.status(400).json({
         status: false,
         statusCode: 400,
         message: "No Filters found",
         data: null,
-      })
+      });
       return;
     }
 
@@ -1190,9 +1188,9 @@ const getInvoiceFilters = async (req, res) => {
     const { companyId } = req.query;
     const response = await InvoiceModel.aggregate([
       {
-        $match:{
-          companyId: new mongoose.Types.ObjectId(companyId)
-        }
+        $match: {
+          companyId: new mongoose.Types.ObjectId(companyId),
+        },
       },
       {
         $lookup: {
@@ -1219,22 +1217,22 @@ const getInvoiceFilters = async (req, res) => {
       {
         $project: {
           _id: 1,
-          invoiceType:1,
+          invoiceType: 1,
           "clientId._id": 1,
           "clientId.clientName": 1,
-          "projectId.projectCode":1,
+          "projectId.projectCode": 1,
           "projectId._id": 1,
-        }
+        },
       },
     ]);
 
-    if(!response){
+    if (!response) {
       res.status(400).json({
         status: false,
         statusCode: 400,
         message: "No Filters found",
         data: null,
-      })
+      });
       return;
     }
 
@@ -1247,7 +1245,7 @@ const getInvoiceFilters = async (req, res) => {
   } catch (error) {
     console.log(error);
   }
-}
+};
 
 module.exports = {
   getCompanyData,
@@ -1272,5 +1270,5 @@ module.exports = {
   getInvoiceById,
   fetchInvoiceForCompany,
   getProjectFilters,
-  getInvoiceFilters
+  getInvoiceFilters,
 };
