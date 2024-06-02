@@ -549,6 +549,8 @@ const createUpdateInvoice = async (req, res) => {
     delete invoiceData._id;
     delete invoiceData.__v;
     let invoiceResponse;
+    // console.log(invoiceData)
+    // return;
     if (invoiceId) {
       invoiceResponse = await InvoiceModel.findByIdAndUpdate(
         invoiceId,
@@ -696,6 +698,8 @@ const createUpdateProject = async (req, res) => {
       shipToAddress,
       attachedDocument,
     };
+
+    console.log("dataToInsert", dataToInsert.projectType);
     let projectResponse;
     if (_id) {
       projectResponse = await ProjectModel.findByIdAndUpdate(
@@ -935,7 +939,7 @@ const fetchInvoiceForCompany = async (req, res) => {
       locationFilter,
       invoiceTypeFilter,
     } = req.query;
-    console.log("req.query", req.query);
+    // console.log("req.query", req.query);
     const projectTypeArray = Array.isArray(projectTypeFilter)
       ? projectTypeFilter
       : projectTypeFilter.length
@@ -948,7 +952,7 @@ const fetchInvoiceForCompany = async (req, res) => {
       ? [projectNumberFilter]
       : [];
 
-    console.log("projectNumberArray", projectNumberArray);
+    // console.log("projectNumberArray", projectNumberArray);
     const clientNameArray = Array.isArray(clientNameFilter)
       ? clientNameFilter
       : clientNameFilter.length
@@ -1061,13 +1065,13 @@ const fetchInvoiceForCompany = async (req, res) => {
         },
       },
     ]);
-    console.log("response invoice after lookup", invoiceResponse);
+    // console.log("response invoice after lookup", invoiceResponse);
     if (clientNameArray.length) {
       invoiceResponse = invoiceResponse.filter((orderItem) =>
         orderItem.clientId.clientName.includes(clientNameArray)
       );
     }
-
+    
     if (projectNumberArray.length) {
       invoiceResponse = invoiceResponse.filter((orderItem) =>
         orderItem.projectId.projectCode.includes(projectNumberArray)
@@ -1076,16 +1080,19 @@ const fetchInvoiceForCompany = async (req, res) => {
 
     if (projectTypeArray.length) {
       invoiceResponse = invoiceResponse.filter((orderItem) =>
-        orderItem.projectId.projectType.includes(projectTypeArray)
-      );
+        orderItem.projectId.projectType.some((type) => projectTypeArray.includes(type))
+        // console.log("orderItem.projectId.projectType", orderItem.projectId.projectType, orderItem.projectId)
+);
+      // console.log("invoiceResponse after projectType", projectTypeArray);
     }
-    console.log("invoiceResponse before location", invoiceResponse);
+     // console.log("invoiceResponse before location", invoiceResponse);
     if (locationFilter) {
       invoiceResponse = invoiceResponse.filter((orderItem) =>
         orderItem.projectId.siteLocation.includes(locationFilter)
       );
     }
 
+    console.log("invoiceResponse after Filter", invoiceTypeFilter);
     if (invoiceTypeFilter) {
       invoiceResponse = invoiceResponse.filter((orderItem) =>
         orderItem.invoiceType.includes(invoiceTypeFilter)
