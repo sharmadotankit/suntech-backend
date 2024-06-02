@@ -769,12 +769,24 @@ const fetchProjectsForCompany = async (req, res) => {
       projectStatusFilter,
     } = req.query;
 
-
+console.log("req.query", req.query);
     // Ensure projectTypeFilter is an array
     const projectTypeArray = Array.isArray(projectTypeFilter)
       ? projectTypeFilter
       : projectTypeFilter.length 
       ? [projectTypeFilter] 
+      : [];
+
+    const projectNumberArray = Array.isArray(projectNumberFilter)
+      ? projectNumberFilter
+      : projectNumberFilter.length 
+      ? [projectNumberFilter] 
+      : [];
+
+      const clientNameArray = Array.isArray(clientNameFilter)
+      ? clientNameFilter
+      : clientNameFilter.length 
+      ? [clientNameFilter] 
       : [];
 
     let matchConditions = {
@@ -792,11 +804,11 @@ const fetchProjectsForCompany = async (req, res) => {
     //   });
     // }
 
-    if (projectNumberFilter) {
+    if (projectNumberArray.length) {
       orConditions.push({
         projectCode: {
-          $regex: projectNumberFilter,
-          $options: "i",
+          $in: projectNumberArray,
+          // $options: "i",
         },
       });
     }
@@ -866,9 +878,9 @@ const fetchProjectsForCompany = async (req, res) => {
     ]);
 
 
-    if(clientNameFilter){
+    if(clientNameArray.length){
       projectResponse = projectResponse.filter((orderItem) =>
-        orderItem.clientId.clientName.toLowerCase().includes(clientNameFilter.toLowerCase())
+        orderItem.clientId.clientName.includes(clientNameArray)
       );
     }
 
@@ -925,71 +937,86 @@ const fetchInvoiceForCompany = async (req, res) => {
       locationFilter,
       invoiceTypeFilter,
     } = req.query;
-
+console.log("req.query", req.query);
     const projectTypeArray = Array.isArray(projectTypeFilter)
       ? projectTypeFilter
       : projectTypeFilter.length
       ? [projectTypeFilter]
       : [];
-    console.log("projectTypeArray iiiiiii", projectTypeArray);
+
+      const projectNumberArray = Array.isArray(projectNumberFilter)
+      ? projectNumberFilter
+      : projectNumberFilter.length 
+      ? [projectNumberFilter] 
+      : [];
+
+console.log("projectNumberArray", projectNumberArray);
+      const clientNameArray = Array.isArray(clientNameFilter)
+      ? clientNameFilter
+      : clientNameFilter.length 
+      ? [clientNameFilter] 
+      : [];
 
     let matchConditions = {
       companyId: new mongoose.Types.ObjectId(companyId),
     };
 
-    console.log("Received query parameters:", req.query);
+    //console.log("Received query parameters:", req.query);
 
     let orConditions = [];
 
-    if (clientNameFilter) {
-      orConditions.push({
-        "clientId.clientName": {
-          $regex: clientNameFilter,
-          $options: "i",
-        },
-      });
-    }
+    // if (clientNameFilter) {
+    //   orConditions.push({
+    //     "clientId.clientName": {
+    //       $regex: clientNameFilter,
+    //       $options: "i",
+    //     },
+    //   });
+    // }
 
-    if (projectNumberFilter) {
-      orConditions.push({
-        "projectId.projectCode": {
-          $regex: projectNumberFilter,
-          $options: "i",
-        },
-      });
-    }
+    // if (projectNumberFilter) {
+    //   orConditions.push({
+    //     "projectId.projectCode": {
+    //       $regex: projectNumberFilter,
+    //       $options: "i",
+    //     },
+    //   });
+    //}
 
-    if (locationFilter) {
-      orConditions.push({
-        siteLocation: {
-          $regex: locationFilter,
-          $options: "i",
-        },
-      });
-    }
+    // if (locationFilter) {
+    //   orConditions.push({
+    //     siteLocation: {
+    //       $regex: locationFilter,
+    //       $options: "i",
+    //     },
+    //   });
+   // }
 
-    if (projectTypeArray.length) {
-      orConditions.push({
-        "projectId.projectType": {
-          $in: projectTypeArray,
-        },
-      });
-    }
+    // if (projectTypeArray.length) {
+    //   orConditions.push({
+    //     "projectId.projectType": {
+    //       $in: projectTypeArray,
+    //     },
+    //   });
+    // }
 
-    if (invoiceTypeFilter) {
-      orConditions.push({
-        invoiceType: {
-          $regex: invoiceTypeFilter,
-          $options: "i",
-        },
-      });
-    }
+    // if (invoiceTypeFilter) {
+    //   orConditions.push({
+    //     invoiceType: {
+    //       $regex: invoiceTypeFilter,
+    //       $options: "i",
+    //     },
+    //   });
+    // }
 
     if (orConditions.length) {
       matchConditions.$or = orConditions;
     }
 
     let invoiceResponse = await InvoiceModel.aggregate([
+      {
+        $match: matchConditions,
+      },
       {
         $lookup: {
           from: "clients",
@@ -1013,9 +1040,6 @@ const fetchInvoiceForCompany = async (req, res) => {
         $unwind: "$projectId",
       },
       {
-        $match: matchConditions,
-      },
-      {
         $project: {
           _id: 1,
           "clientId._id": 1,
@@ -1023,6 +1047,8 @@ const fetchInvoiceForCompany = async (req, res) => {
           "projectId._id": 1,
           "projectId.projectCode": 1,
           "projectId.shortDescription": 1,
+          "projectId.projectType": 1,
+          "projectId.siteLocation": 1,
           invoiceType: 1,
           invoiceDate: 1,
           gstNo: 1,
@@ -1037,6 +1063,36 @@ const fetchInvoiceForCompany = async (req, res) => {
         },
       },
     ]);
+console.log("response invoice after lookup", invoiceResponse);
+    if(clientNameArray.length){
+      invoiceResponse = invoiceResponse.filter((orderItem) =>
+        orderItem.clientId.clientName.includes(clientNameArray)
+      );
+    }
+
+    if(projectNumberArray.length){
+      invoiceResponse = invoiceResponse.filter((orderItem) =>
+        orderItem.projectId.projectCode.includes(projectNumberArray)
+      );
+    }
+
+    if(projectTypeArray.length){
+      invoiceResponse = invoiceResponse.filter((orderItem) =>
+        orderItem.projectId.projectType.includes(projectTypeArray)  
+    );
+  }
+console.log("invoiceResponse before location", invoiceResponse);
+  if(locationFilter){
+    invoiceResponse = invoiceResponse.filter((orderItem) =>
+      orderItem.projectId.siteLocation.includes(locationFilter)  
+  );
+}
+
+if(invoiceTypeFilter){
+  invoiceResponse = invoiceResponse.filter((orderItem) =>
+    orderItem.invoiceType.includes(invoiceTypeFilter)  
+);
+}
 
     if (createdFrom) {
       invoiceResponse = invoiceResponse.filter((offerItem) =>
@@ -1077,6 +1133,122 @@ const fetchInvoiceForCompany = async (req, res) => {
   }
 };
 
+const getProjectFilters = async (req, res) => {
+  try {
+    console.log("came hererrererererererererererere")
+    const { companyId } = req.query;
+    const response = await ProjectModel.aggregate([
+      {
+        $match:{
+          companyId: new mongoose.Types.ObjectId(companyId)
+        }
+      },
+      {
+        $lookup: {
+          from: "clients",
+          localField: "clientId",
+          foreignField: "_id",
+          as: "clientId",
+        },
+      },
+      {
+        $unwind: "$clientId",
+      },
+      {
+        $project: {
+          _id: 1,
+          "clientId._id": 1,
+          "clientId.clientName": 1,
+          projectCode:1,
+        }
+      },
+    ]);
+
+    if(!response){
+      res.status(400).json({
+        status: false,
+        statusCode: 400,
+        message: "No Filters found",
+        data: null,
+      })
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      statusCode: 200,
+      data: response,
+      message: "Fetch Filters Response Successful",
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getInvoiceFilters = async (req, res) => {
+  try {
+    const { companyId } = req.query;
+    const response = await InvoiceModel.aggregate([
+      {
+        $match:{
+          companyId: new mongoose.Types.ObjectId(companyId)
+        }
+      },
+      {
+        $lookup: {
+          from: "clients",
+          localField: "clientId",
+          foreignField: "_id",
+          as: "clientId",
+        },
+      },
+      {
+        $unwind: "$clientId",
+      },
+      {
+        $lookup: {
+          from: "projects",
+          localField: "projectId",
+          foreignField: "_id",
+          as: "projectId",
+        },
+      },
+      {
+        $unwind: "$projectId",
+      },
+      {
+        $project: {
+          _id: 1,
+          invoiceType:1,
+          "clientId._id": 1,
+          "clientId.clientName": 1,
+          "projectId.projectCode":1,
+          "projectId._id": 1,
+        }
+      },
+    ]);
+
+    if(!response){
+      res.status(400).json({
+        status: false,
+        statusCode: 400,
+        message: "No Filters found",
+        data: null,
+      })
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      statusCode: 200,
+      data: response,
+      message: "Fetch Filters Response Successful",
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = {
   getCompanyData,
   updateCompany,
@@ -1099,4 +1271,6 @@ module.exports = {
   getProjectById,
   getInvoiceById,
   fetchInvoiceForCompany,
+  getProjectFilters,
+  getInvoiceFilters
 };

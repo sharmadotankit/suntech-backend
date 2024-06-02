@@ -37,6 +37,8 @@ router.get('/offer/:offerId', authMiddleWare.checkIfAdmin, adminController.getOf
 router.post('/create-update-project', authMiddleWare.checkIfAdmin, upload.array("attachedDocumentFile"), adminController.createUpdateProject)
 router.get('/projects', authMiddleWare.checkIfValidUser, adminController.fetchProjectsForCompany)
 router.get('/project/:projectId', authMiddleWare.checkIfAdmin, adminController.getProjectById)
+router.get('/project-filters', authMiddleWare.checkIfAdmin, adminController.getProjectFilters)
+router.get('/invoice-filters', authMiddleWare.checkIfAdmin, adminController.getInvoiceFilters)
 router.post('/create-update-invoice', authMiddleWare.checkIfAdmin, adminController.createUpdateInvoice)
 router.get('/invoice/:invoiceId', authMiddleWare.checkIfAdmin, adminController.getInvoiceById)
 router.get('/invoice', authMiddleWare.checkIfAdmin, adminController.fetchInvoiceForCompany)
