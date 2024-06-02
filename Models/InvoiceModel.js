@@ -13,7 +13,7 @@ const InvoiceSchema = new Schema(
             ref: 'client',
             required:true,
         },
-        projectId:{
+        projects:{
             type: Schema.Types.ObjectId,
             ref: 'projects',
             required:true,
