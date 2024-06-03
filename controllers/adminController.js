@@ -544,21 +544,66 @@ const createUpdateAssociate = async (req, res) => {
 
 const createUpdateInvoice = async (req, res) => {
   try {
-    let invoiceData = req.body;
-    let invoiceId = invoiceData._id;
-    delete invoiceData._id;
-    delete invoiceData.__v;
+    let files = req.files;
+    let {
+      _id,
+      companyId,
+      clientId,
+      projectId,
+      invoiceType,
+      invoiceDate,
+      gstNo,
+      totalFees,
+      total,
+      taxableValue,
+      feesBreakup,
+      tax,
+      taxAmount,
+      netTotal,
+      stampDocumentData,
+    } = req.body;
+
+    stampDocumentData.files = files[0];
+    feesBreakup = JSON.parse(feesBreakup);
+    tax = JSON.parse(tax);
+    stampDocumentData = JSON.parse(stampDocumentData);
+
+    let stampDocument = {
+      file: files[0],
+      description: stampDocumentData.description,
+    };
+
+    let dataToInsert = {
+      _id,
+      companyId,
+      clientId,
+      projectId,
+      invoiceType,
+      invoiceDate,
+      gstNo,
+      totalFees,
+      total,
+      taxableValue,
+      feesBreakup,
+      tax,
+      taxAmount,
+      netTotal,
+      stampDocument,
+    };
+console.log("dataToInsert", dataToInsert);
+
+
     let invoiceResponse;
     // console.log(invoiceData)
     // return;
-    if (invoiceId) {
+    if (_id) {
       invoiceResponse = await InvoiceModel.findByIdAndUpdate(
-        invoiceId,
-        invoiceData,
+        _id,
+        dataToInsert,
         { new: true }
       );
     } else {
-      invoiceResponse = await InvoiceModel.create(invoiceData);
+      invoiceResponse = await InvoiceModel.create(dataToInsert);
     }
 
     if (!invoiceResponse) {
