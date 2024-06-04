@@ -547,6 +547,7 @@ const createUpdateInvoice = async (req, res) => {
     let files = req.files;
     let {
       _id,
+      invoiceNumber,
       companyId,
       clientId,
       projectId,
@@ -574,7 +575,7 @@ const createUpdateInvoice = async (req, res) => {
     };
 
     let dataToInsert = {
-      _id,
+      invoiceNumber,
       companyId,
       clientId,
       projectId,
@@ -594,8 +595,6 @@ console.log("dataToInsert", dataToInsert);
 
 
     let invoiceResponse;
-    // console.log(invoiceData)
-    // return;
     if (_id) {
       invoiceResponse = await InvoiceModel.findByIdAndUpdate(
         _id,

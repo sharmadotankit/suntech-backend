@@ -18,6 +18,7 @@ const InvoiceSchema = new Schema(
             ref: 'projects',
             required:true,
         },
+        invoiceNumber:{type:String,required:true},
         invoiceType:{type:String, required:true},
         invoiceDate:{type:Date, required:true},
         gstNo:{type:String,required:true},
