@@ -545,6 +545,9 @@ const createUpdateAssociate = async (req, res) => {
 const createUpdateInvoice = async (req, res) => {
   try {
     let files = req.files;
+    let stampDocumentFile = files.filter(file => file.fieldname === 'stampDocumentFile')[0] || null;
+    let signedAttachDocumentFile = files.filter(file => file.fieldname === 'signedCopyDocument')[0] || null;
+
     let {
       _id,
       invoiceNumber,
@@ -561,18 +564,14 @@ const createUpdateInvoice = async (req, res) => {
       tax,
       taxAmount,
       netTotal,
-      stampDocumentData,
     } = req.body;
 
-    stampDocumentData.files = files[0];
     feesBreakup = JSON.parse(feesBreakup);
     tax = JSON.parse(tax);
-    stampDocumentData = JSON.parse(stampDocumentData);
 
-    let stampDocument = {
-      file: files[0],
-      description: stampDocumentData.description,
-    };
+
+    let stampDocument = stampDocumentFile;
+    let signedCopyDocument = signedAttachDocumentFile;
 
     let dataToInsert = {
       invoiceNumber,
@@ -590,9 +589,8 @@ const createUpdateInvoice = async (req, res) => {
       taxAmount,
       netTotal,
       stampDocument,
+      signedCopyDocument
     };
-console.log("dataToInsert", dataToInsert);
-
 
     let invoiceResponse;
     if (_id) {
