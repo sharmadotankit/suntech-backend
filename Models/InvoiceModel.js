@@ -71,7 +71,8 @@ const InvoiceSchema = new Schema(
             metadata: { type: Schema.Types.Mixed, default: null },
             location: { type: String },
             etag: { type: String },
-        }
+        },
+        amountReceivedTransactions:Array,
     },
     { timestamp: true }
 );

@@ -548,6 +548,8 @@ const createUpdateInvoice = async (req, res) => {
     let stampDocumentFile = files.filter(file => file.fieldname === 'stampDocumentFile')[0] || null;
     let signedAttachDocumentFile = files.filter(file => file.fieldname === 'signedCopyDocument')[0] || null;
 
+
+
     let {
       _id,
       invoiceNumber,
@@ -564,14 +566,22 @@ const createUpdateInvoice = async (req, res) => {
       tax,
       taxAmount,
       netTotal,
+      amountReceivedTransactions
     } = req.body;
 
     feesBreakup = JSON.parse(feesBreakup);
     tax = JSON.parse(tax);
 
+    if(_id){
+      let existingInvoice = await InvoiceModel.findById(_id);
+      if(existingInvoice.stampDocument && stampDocumentFile ==null){
+        stampDocumentFile = existingInvoice.stampDocument;
+      }
 
-    let stampDocument = stampDocumentFile;
-    let signedCopyDocument = signedAttachDocumentFile;
+      if(existingInvoice.signedCopyDocument && signedAttachDocumentFile ==null){
+        signedAttachDocumentFile = existingInvoice.signedCopyDocument;
+      }
+    }
 
     let dataToInsert = {
       invoiceNumber,
@@ -588,8 +598,9 @@ const createUpdateInvoice = async (req, res) => {
       tax,
       taxAmount,
       netTotal,
-      stampDocument,
-      signedCopyDocument
+      stampDocument:stampDocumentFile,
+      signedCopyDocument:signedAttachDocumentFile,
+      amountReceivedTransactions: JSON.parse(amountReceivedTransactions)
     };
 
     let invoiceResponse;
@@ -615,7 +626,7 @@ const createUpdateInvoice = async (req, res) => {
     res.status(200).json({
       status: true,
       statusCode: 200,
-      message: "Created invoice successfully",
+      message: `Invoice ${_id?"updated": "created"} successfully`,
       data: null,
     });
   } catch (err) {
