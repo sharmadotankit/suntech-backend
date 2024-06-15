@@ -389,15 +389,6 @@ const fetchOfferForCompany = async (req, res) => {
       projectNumberFilter,
     } = req.query;
 
-    console.log(
-      createdFrom,
-      createdTo,
-      companyId,
-      sortField,
-      sortOrder,
-      clientNameFilter,
-      projectNumberFilter
-    );
     let offerResponse = await OfferLetterModel.aggregate([
       {
         $match: {
@@ -752,7 +743,6 @@ const createUpdateProject = async (req, res) => {
       attachedDocument,
     };
 
-    console.log("dataToInsert", dataToInsert.projectType);
     let projectResponse;
     if (_id) {
       projectResponse = await ProjectModel.findByIdAndUpdate(
@@ -826,7 +816,6 @@ const fetchProjectsForCompany = async (req, res) => {
       projectStatusFilter,
     } = req.query;
 
-    console.log("req.query", req.query);
     // Ensure projectTypeFilter is an array
     const projectTypeArray = Array.isArray(projectTypeFilter)
       ? projectTypeFilter
@@ -968,7 +957,7 @@ const fetchProjectsForCompany = async (req, res) => {
       message: "Fetch projects Successful",
     });
   } catch (err) {
-    console.log("hasvcjvsckahbsv", err);
+    console.log("err", err);
     res.status(500).json({
       status: false,
       statusCode: 500,
@@ -992,7 +981,6 @@ const fetchInvoiceForCompany = async (req, res) => {
       locationFilter,
       invoiceTypeFilter,
     } = req.query;
-    // console.log("req.query", req.query);
     const projectTypeArray = Array.isArray(projectTypeFilter)
       ? projectTypeFilter
       : projectTypeFilter.length
@@ -1145,7 +1133,6 @@ const fetchInvoiceForCompany = async (req, res) => {
       );
     }
 
-    console.log("invoiceResponse after Filter", invoiceTypeFilter);
     if (invoiceTypeFilter) {
       invoiceResponse = invoiceResponse.filter((orderItem) =>
         orderItem.invoiceType.includes(invoiceTypeFilter)
@@ -1193,7 +1180,6 @@ const fetchInvoiceForCompany = async (req, res) => {
 
 const getProjectFilters = async (req, res) => {
   try {
-    console.log("came hererrererererererererererere");
     const { companyId } = req.query;
     const response = await ProjectModel.aggregate([
       {
