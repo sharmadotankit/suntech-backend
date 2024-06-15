@@ -15,7 +15,7 @@ const InvoiceSchema = new Schema(
         },
         projectId: {
             type: Schema.Types.ObjectId,
-            ref: 'projects',
+            ref: 'project',
             required: true,
         },
         invoiceNumber: { type: String, required: true },

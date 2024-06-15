@@ -42,5 +42,9 @@ router.get('/invoice-filters', authMiddleWare.checkIfAdmin, adminController.getI
 router.post('/create-update-invoice', authMiddleWare.checkIfAdmin,upload.any(), adminController.createUpdateInvoice)
 router.get('/invoice/:invoiceId', authMiddleWare.checkIfAdmin, adminController.getInvoiceById)
 router.get('/invoice', authMiddleWare.checkIfAdmin, adminController.fetchInvoiceForCompany)
+router.get('/invoice-letter/:invoiceId', authMiddleWare.checkIfAdmin, adminController.fetchInvoiceLetterByInvoiceId)
+
+
+
 
 module.exports = router;

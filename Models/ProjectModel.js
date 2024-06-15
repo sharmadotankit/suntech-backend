@@ -19,7 +19,6 @@ const ProjectSchema = new Schema(
             required:true,
         },
         projectCode:{type:String,required:true},
-        //projectNumber:{type:String,required:false},
         isActive:{type:Boolean,default:true},
         projectType:[{type:String, required:true}],
         orderDate:{type:Date, required:true},

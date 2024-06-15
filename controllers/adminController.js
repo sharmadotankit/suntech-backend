@@ -5,6 +5,7 @@ const OfferLetterModel = require("../Models/OfferModel");
 const InvoiceModel = require("../Models/InvoiceModel");
 const { default: mongoose } = require("mongoose");
 const moment = require("moment");
+const InvoiceLetterModel = require("../Models/InvoiceLetterModel");
 
 const getCompanyData = async (req, res) => {
   try {
@@ -563,13 +564,13 @@ const createUpdateInvoice = async (req, res) => {
     feesBreakup = JSON.parse(feesBreakup);
     tax = JSON.parse(tax);
 
-    if(_id){
+    if (_id) {
       let existingInvoice = await InvoiceModel.findById(_id);
-      if(existingInvoice.stampDocument && stampDocumentFile ==null){
+      if (existingInvoice.stampDocument && stampDocumentFile == null) {
         stampDocumentFile = existingInvoice.stampDocument;
       }
 
-      if(existingInvoice.signedCopyDocument && signedAttachDocumentFile ==null){
+      if (existingInvoice.signedCopyDocument && signedAttachDocumentFile == null) {
         signedAttachDocumentFile = existingInvoice.signedCopyDocument;
       }
     }
@@ -589,8 +590,8 @@ const createUpdateInvoice = async (req, res) => {
       tax,
       taxAmount,
       netTotal,
-      stampDocument:stampDocumentFile,
-      signedCopyDocument:signedAttachDocumentFile,
+      stampDocument: stampDocumentFile,
+      signedCopyDocument: signedAttachDocumentFile,
       amountReceivedTransactions: JSON.parse(amountReceivedTransactions)
     };
 
@@ -617,7 +618,7 @@ const createUpdateInvoice = async (req, res) => {
     res.status(200).json({
       status: true,
       statusCode: 200,
-      message: `Invoice ${_id?"updated": "created"} successfully`,
+      message: `Invoice ${_id ? "updated" : "created"} successfully`,
       data: null,
     });
   } catch (err) {
@@ -820,20 +821,20 @@ const fetchProjectsForCompany = async (req, res) => {
     const projectTypeArray = Array.isArray(projectTypeFilter)
       ? projectTypeFilter
       : projectTypeFilter.length
-      ? [projectTypeFilter]
-      : [];
+        ? [projectTypeFilter]
+        : [];
 
     const projectNumberArray = Array.isArray(projectNumberFilter)
       ? projectNumberFilter
       : projectNumberFilter.length
-      ? [projectNumberFilter]
-      : [];
+        ? [projectNumberFilter]
+        : [];
 
     const clientNameArray = Array.isArray(clientNameFilter)
       ? clientNameFilter
       : clientNameFilter.length
-      ? [clientNameFilter]
-      : [];
+        ? [clientNameFilter]
+        : [];
 
     let matchConditions = {
       companyId: new mongoose.Types.ObjectId(companyId),
@@ -984,21 +985,21 @@ const fetchInvoiceForCompany = async (req, res) => {
     const projectTypeArray = Array.isArray(projectTypeFilter)
       ? projectTypeFilter
       : projectTypeFilter.length
-      ? [projectTypeFilter]
-      : [];
+        ? [projectTypeFilter]
+        : [];
 
     const projectNumberArray = Array.isArray(projectNumberFilter)
       ? projectNumberFilter
       : projectNumberFilter.length
-      ? [projectNumberFilter]
-      : [];
+        ? [projectNumberFilter]
+        : [];
 
     // console.log("projectNumberArray", projectNumberArray);
     const clientNameArray = Array.isArray(clientNameFilter)
       ? clientNameFilter
       : clientNameFilter.length
-      ? [clientNameFilter]
-      : [];
+        ? [clientNameFilter]
+        : [];
 
     let matchConditions = {
       companyId: new mongoose.Types.ObjectId(companyId),
@@ -1112,7 +1113,7 @@ const fetchInvoiceForCompany = async (req, res) => {
         orderItem.clientId.clientName.includes(clientNameArray)
       );
     }
-    
+
     if (projectNumberArray.length) {
       invoiceResponse = invoiceResponse.filter((orderItem) =>
         orderItem.projectId.projectCode.includes(projectNumberArray)
@@ -1122,11 +1123,8 @@ const fetchInvoiceForCompany = async (req, res) => {
     if (projectTypeArray.length) {
       invoiceResponse = invoiceResponse.filter((orderItem) =>
         orderItem.projectId.projectType.some((type) => projectTypeArray.includes(type))
-        // console.log("orderItem.projectId.projectType", orderItem.projectId.projectType, orderItem.projectId)
-);
-      // console.log("invoiceResponse after projectType", projectTypeArray);
+      );
     }
-     // console.log("invoiceResponse before location", invoiceResponse);
     if (locationFilter) {
       invoiceResponse = invoiceResponse.filter((orderItem) =>
         orderItem.projectId.siteLocation.includes(locationFilter)
@@ -1226,6 +1224,12 @@ const getProjectFilters = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json({
+      status: false,
+      statusCode: 500,
+      message: "Internal Server Error",
+      data: null,
+    });
   }
 };
 
@@ -1290,8 +1294,46 @@ const getInvoiceFilters = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json({
+      status: false,
+      statusCode: 500,
+      message: "Internal Server Error",
+      data: null,
+    });
   }
 };
+
+
+const fetchInvoiceLetterByInvoiceId = async (req, res) => {
+  try {
+    const { invoiceId } = req.params;
+
+    const invoiceResponse = await InvoiceModel.findById(invoiceId).populate('projectId');
+    console.log("InvoiceReposnse", invoiceResponse)
+    const invoiceLetterData = await InvoiceLetterModel.findOne({ invoiceId: invoiceId });
+
+    let dataToReturn = {
+      invoiceResponse,
+      invoiceLetterData
+    }
+
+    res.status(200).json({
+      status: true,
+      statusCode: 200,
+      data: dataToReturn,
+      message: "Fetch Invoice Letter data Successful",
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: false,
+      statusCode: 500,
+      message: "Internal Server Error",
+      data: null,
+    });
+  }
+}
 
 module.exports = {
   getCompanyData,
@@ -1317,4 +1359,5 @@ module.exports = {
   fetchInvoiceForCompany,
   getProjectFilters,
   getInvoiceFilters,
+  fetchInvoiceLetterByInvoiceId,
 };
