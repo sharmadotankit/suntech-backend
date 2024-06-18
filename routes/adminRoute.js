@@ -43,7 +43,7 @@ router.post('/create-update-invoice', authMiddleWare.checkIfAdmin,upload.any(), 
 router.get('/invoice/:invoiceId', authMiddleWare.checkIfAdmin, adminController.getInvoiceById)
 router.get('/invoice', authMiddleWare.checkIfAdmin, adminController.fetchInvoiceForCompany)
 router.get('/invoice-letter/:invoiceId', authMiddleWare.checkIfAdmin, adminController.fetchInvoiceLetterByInvoiceId)
-
+router.post('/create-update-invoice-letter',authMiddleWare.checkIfAdmin, adminController.createUpdateInvoiceLetter);
 
 
 

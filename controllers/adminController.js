@@ -1309,7 +1309,6 @@ const fetchInvoiceLetterByInvoiceId = async (req, res) => {
     const { invoiceId } = req.params;
 
     const invoiceResponse = await InvoiceModel.findById(invoiceId).populate('projectId');
-    console.log("InvoiceReposnse", invoiceResponse)
     const invoiceLetterData = await InvoiceLetterModel.findOne({ invoiceId: invoiceId });
 
     let dataToReturn = {
@@ -1323,6 +1322,46 @@ const fetchInvoiceLetterByInvoiceId = async (req, res) => {
       data: dataToReturn,
       message: "Fetch Invoice Letter data Successful",
     });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: false,
+      statusCode: 500,
+      message: "Internal Server Error",
+      data: null,
+    });
+  }
+}
+
+
+const createUpdateInvoiceLetter = async (req, res) => {
+  try {
+    let data = req.body;
+    console.log('data',data)
+
+    let invoiceLetterResponse;
+    if(data._id){
+      invoiceLetterResponse = await InvoiceLetterModel.findByIdAndUpdate(data._id, data);
+    }else{
+      invoiceLetterResponse  = await InvoiceLetterModel.create(data);
+    }
+
+    if(invoiceLetterResponse){
+      res.status(200).json({
+        status: true,
+        statusCode: 200,
+        data: invoiceLetterResponse,
+        message: "Create Invoice Letter Successful",
+      });
+    }else{
+      res.status(400).json({
+        status: false,
+        statusCode: 400,
+        message: "Create Invoice Letter Failed",
+        data: null,
+      });
+    }
 
   } catch (error) {
     console.log(error);
@@ -1360,4 +1399,5 @@ module.exports = {
   getProjectFilters,
   getInvoiceFilters,
   fetchInvoiceLetterByInvoiceId,
+  createUpdateInvoiceLetter,
 };
