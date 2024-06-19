@@ -994,7 +994,7 @@ const fetchInvoiceForCompany = async (req, res) => {
         ? [projectNumberFilter]
         : [];
 
-    // console.log("projectNumberArray", projectNumberArray);
+
     const clientNameArray = Array.isArray(clientNameFilter)
       ? clientNameFilter
       : clientNameFilter.length
@@ -1005,53 +1005,7 @@ const fetchInvoiceForCompany = async (req, res) => {
       companyId: new mongoose.Types.ObjectId(companyId),
     };
 
-    //console.log("Received query parameters:", req.query);
-
     let orConditions = [];
-
-    // if (clientNameFilter) {
-    //   orConditions.push({
-    //     "clientId.clientName": {
-    //       $regex: clientNameFilter,
-    //       $options: "i",
-    //     },
-    //   });
-    // }
-
-    // if (projectNumberFilter) {
-    //   orConditions.push({
-    //     "projectId.projectCode": {
-    //       $regex: projectNumberFilter,
-    //       $options: "i",
-    //     },
-    //   });
-    //}
-
-    // if (locationFilter) {
-    //   orConditions.push({
-    //     siteLocation: {
-    //       $regex: locationFilter,
-    //       $options: "i",
-    //     },
-    //   });
-    // }
-
-    // if (projectTypeArray.length) {
-    //   orConditions.push({
-    //     "projectId.projectType": {
-    //       $in: projectTypeArray,
-    //     },
-    //   });
-    // }
-
-    // if (invoiceTypeFilter) {
-    //   orConditions.push({
-    //     invoiceType: {
-    //       $regex: invoiceTypeFilter,
-    //       $options: "i",
-    //     },
-    //   });
-    // }
 
     if (orConditions.length) {
       matchConditions.$or = orConditions;
@@ -1099,6 +1053,11 @@ const fetchInvoiceForCompany = async (req, res) => {
           totalFees: 1,
           tax: 1,
           netTotal: 1,
+          invoiceNumber: 1,
+          invoiceStatus: 1,
+          taxableValue:1,
+          taxAmount:1,
+          amountReceivedTransactions:1,
         },
       },
       {
