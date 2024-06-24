@@ -40,6 +40,7 @@ router.get('/project/:projectId', authMiddleWare.checkIfAdmin, adminController.g
 router.get('/project-filters', authMiddleWare.checkIfAdmin, adminController.getProjectFilters)
 router.get('/invoice-filters', authMiddleWare.checkIfAdmin, adminController.getInvoiceFilters)
 router.post('/create-update-invoice', authMiddleWare.checkIfAdmin,upload.any(), adminController.createUpdateInvoice)
+router.post('/save-site-visit', authMiddleWare.checkIfAdmin,upload.any(), adminController.createUpdateSiteVisit)
 router.get('/invoice/:invoiceId', authMiddleWare.checkIfAdmin, adminController.getInvoiceById)
 router.get('/invoice', authMiddleWare.checkIfAdmin, adminController.fetchInvoiceForCompany)
 router.get('/invoice-letter/:invoiceId', authMiddleWare.checkIfAdmin, adminController.fetchInvoiceLetterByInvoiceId)
