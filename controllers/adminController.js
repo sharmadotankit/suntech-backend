@@ -3,6 +3,7 @@ const ClientModel = require("../Models/ClientModel");
 const ProjectModel = require("../Models/ProjectModel");
 const OfferLetterModel = require("../Models/OfferModel");
 const InvoiceModel = require("../Models/InvoiceModel");
+const SiteVisitModel = require("../Models/SiteVisitsModel");
 const { default: mongoose } = require("mongoose");
 const moment = require("moment");
 const InvoiceLetterModel = require("../Models/InvoiceLetterModel");
@@ -537,10 +538,11 @@ const createUpdateAssociate = async (req, res) => {
 const createUpdateInvoice = async (req, res) => {
   try {
     let files = req.files;
-    let stampDocumentFile = files.filter(file => file.fieldname === 'stampDocumentFile')[0] || null;
-    let signedAttachDocumentFile = files.filter(file => file.fieldname === 'signedCopyDocument')[0] || null;
-
-
+    let stampDocumentFile =
+      files.filter((file) => file.fieldname === "stampDocumentFile")[0] || null;
+    let signedAttachDocumentFile =
+      files.filter((file) => file.fieldname === "signedCopyDocument")[0] ||
+      null;
 
     let {
       _id,
@@ -558,7 +560,7 @@ const createUpdateInvoice = async (req, res) => {
       tax,
       taxAmount,
       netTotal,
-      amountReceivedTransactions
+      amountReceivedTransactions,
     } = req.body;
 
     feesBreakup = JSON.parse(feesBreakup);
@@ -570,7 +572,10 @@ const createUpdateInvoice = async (req, res) => {
         stampDocumentFile = existingInvoice.stampDocument;
       }
 
-      if (existingInvoice.signedCopyDocument && signedAttachDocumentFile == null) {
+      if (
+        existingInvoice.signedCopyDocument &&
+        signedAttachDocumentFile == null
+      ) {
         signedAttachDocumentFile = existingInvoice.signedCopyDocument;
       }
     }
@@ -592,7 +597,7 @@ const createUpdateInvoice = async (req, res) => {
       netTotal,
       stampDocument: stampDocumentFile,
       signedCopyDocument: signedAttachDocumentFile,
-      amountReceivedTransactions: JSON.parse(amountReceivedTransactions)
+      amountReceivedTransactions: JSON.parse(amountReceivedTransactions),
     };
 
     let invoiceResponse;
@@ -821,20 +826,20 @@ const fetchProjectsForCompany = async (req, res) => {
     const projectTypeArray = Array.isArray(projectTypeFilter)
       ? projectTypeFilter
       : projectTypeFilter.length
-        ? [projectTypeFilter]
-        : [];
+      ? [projectTypeFilter]
+      : [];
 
     const projectNumberArray = Array.isArray(projectNumberFilter)
       ? projectNumberFilter
       : projectNumberFilter.length
-        ? [projectNumberFilter]
-        : [];
+      ? [projectNumberFilter]
+      : [];
 
     const clientNameArray = Array.isArray(clientNameFilter)
       ? clientNameFilter
       : clientNameFilter.length
-        ? [clientNameFilter]
-        : [];
+      ? [clientNameFilter]
+      : [];
 
     let matchConditions = {
       companyId: new mongoose.Types.ObjectId(companyId),
@@ -985,21 +990,20 @@ const fetchInvoiceForCompany = async (req, res) => {
     const projectTypeArray = Array.isArray(projectTypeFilter)
       ? projectTypeFilter
       : projectTypeFilter.length
-        ? [projectTypeFilter]
-        : [];
+      ? [projectTypeFilter]
+      : [];
 
     const projectNumberArray = Array.isArray(projectNumberFilter)
       ? projectNumberFilter
       : projectNumberFilter.length
-        ? [projectNumberFilter]
-        : [];
-
+      ? [projectNumberFilter]
+      : [];
 
     const clientNameArray = Array.isArray(clientNameFilter)
       ? clientNameFilter
       : clientNameFilter.length
-        ? [clientNameFilter]
-        : [];
+      ? [clientNameFilter]
+      : [];
 
     let matchConditions = {
       companyId: new mongoose.Types.ObjectId(companyId),
@@ -1055,9 +1059,9 @@ const fetchInvoiceForCompany = async (req, res) => {
           netTotal: 1,
           invoiceNumber: 1,
           invoiceStatus: 1,
-          taxableValue:1,
-          taxAmount:1,
-          amountReceivedTransactions:1,
+          taxableValue: 1,
+          taxAmount: 1,
+          amountReceivedTransactions: 1,
         },
       },
       {
@@ -1081,7 +1085,9 @@ const fetchInvoiceForCompany = async (req, res) => {
 
     if (projectTypeArray.length) {
       invoiceResponse = invoiceResponse.filter((orderItem) =>
-        orderItem.projectId.projectType.some((type) => projectTypeArray.includes(type))
+        orderItem.projectId.projectType.some((type) =>
+          projectTypeArray.includes(type)
+        )
       );
     }
     if (locationFilter) {
@@ -1262,18 +1268,21 @@ const getInvoiceFilters = async (req, res) => {
   }
 };
 
-
 const fetchInvoiceLetterByInvoiceId = async (req, res) => {
   try {
     const { invoiceId } = req.params;
 
-    const invoiceResponse = await InvoiceModel.findById(invoiceId).populate('projectId');
-    const invoiceLetterData = await InvoiceLetterModel.findOne({ invoiceId: invoiceId });
+    const invoiceResponse = await InvoiceModel.findById(invoiceId).populate(
+      "projectId"
+    );
+    const invoiceLetterData = await InvoiceLetterModel.findOne({
+      invoiceId: invoiceId,
+    });
 
     let dataToReturn = {
       invoiceResponse,
-      invoiceLetterData
-    }
+      invoiceLetterData,
+    };
 
     res.status(200).json({
       status: true,
@@ -1281,7 +1290,6 @@ const fetchInvoiceLetterByInvoiceId = async (req, res) => {
       data: dataToReturn,
       message: "Fetch Invoice Letter data Successful",
     });
-
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -1291,29 +1299,31 @@ const fetchInvoiceLetterByInvoiceId = async (req, res) => {
       data: null,
     });
   }
-}
-
+};
 
 const createUpdateInvoiceLetter = async (req, res) => {
   try {
     let data = req.body;
-    console.log('data',data)
+    console.log("data", data);
 
     let invoiceLetterResponse;
-    if(data._id){
-      invoiceLetterResponse = await InvoiceLetterModel.findByIdAndUpdate(data._id, data);
-    }else{
-      invoiceLetterResponse  = await InvoiceLetterModel.create(data);
+    if (data._id) {
+      invoiceLetterResponse = await InvoiceLetterModel.findByIdAndUpdate(
+        data._id,
+        data
+      );
+    } else {
+      invoiceLetterResponse = await InvoiceLetterModel.create(data);
     }
 
-    if(invoiceLetterResponse){
+    if (invoiceLetterResponse) {
       res.status(200).json({
         status: true,
         statusCode: 200,
         data: invoiceLetterResponse,
         message: "Create Invoice Letter Successful",
       });
-    }else{
+    } else {
       res.status(400).json({
         status: false,
         statusCode: 400,
@@ -1321,7 +1331,6 @@ const createUpdateInvoiceLetter = async (req, res) => {
         data: null,
       });
     }
-
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -1331,7 +1340,57 @@ const createUpdateInvoiceLetter = async (req, res) => {
       data: null,
     });
   }
-}
+};
+
+const createUpdateSiteVisit = async (req, res) => {
+  try {
+    let files = req.files;
+    let {
+      companyId,
+      projectId,
+      clientId,
+      documentNo,
+      placeOfVisit,
+      purposeOfVisit,
+      expenseBySuntech,
+      attachedDocumentData,
+    } = req.body;
+    
+    attachedDocumentData.files = files[0];
+    expenseBySuntech = JSON.parse(expenseBySuntech);
+    
+    let dataToInsert = {
+      companyId,
+      projectId,
+      clientId,
+      documentNo,
+      placeOfVisit,
+      purposeOfVisit,
+      expenseBySuntech,
+      attachedDocumentData,
+    };
+    
+    
+    let siteVisitResponse = await SiteVisitModel.create(dataToInsert);
+    if (siteVisitResponse) {
+      res.status(200).json({
+        status: true,
+        data: siteVisitResponse,
+        statusCode: 200,
+        message: "Create Site Visit Successful",
+      });
+    }
+  }
+   catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: false,
+      statusCode: 500,
+      message: "Internal Server Error",
+      data: null,
+    });
+  }
+};
 
 module.exports = {
   getCompanyData,
@@ -1359,4 +1418,5 @@ module.exports = {
   getInvoiceFilters,
   fetchInvoiceLetterByInvoiceId,
   createUpdateInvoiceLetter,
+  createUpdateSiteVisit,
 };
