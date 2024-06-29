@@ -4,6 +4,7 @@ const ProjectModel = require("../Models/ProjectModel");
 const OfferLetterModel = require("../Models/OfferModel");
 const InvoiceModel = require("../Models/InvoiceModel");
 const SiteVisitModel = require("../Models/SiteVisitsModel");
+const OutwardModel = require("../Models/OutwardModel");
 const { default: mongoose } = require("mongoose");
 const moment = require("moment");
 const InvoiceLetterModel = require("../Models/InvoiceLetterModel");
@@ -658,6 +659,38 @@ const createUpdateExpenses = async (req, res) => {
 
 const createUpdateOutward = async (req, res) => {
   try {
+    let files = req.files;
+    let{
+      companyId,
+      clientId,
+      projectId,
+      docNo,
+      docType,
+      description,
+      outwardDate,
+      documents
+    } = req.body
+    let dataToInsert = {
+      companyId,
+      clientId,
+      projectId,
+      docNo,
+      docType,
+      description,
+      outwardDate,
+      documents
+    };
+
+    let outwardResponse = await OutwardModel.create(dataToInsert);
+
+    if(outwardResponse){
+      res.status(200).json({
+        status: true,
+        data: outwardResponse,
+        statusCode: 200,
+        message: "Create outward Successful",
+      });
+    }
     res.status(200).json({
       status: true,
       statusCode: 200,
@@ -1392,6 +1425,256 @@ const createUpdateSiteVisit = async (req, res) => {
   }
 };
 
+const fetchSiteVisitsForCompany = async (req,res) => {
+  try{
+    const {
+      createdFrom,
+      createdTo,
+      companyId,
+      sortField,
+      sortOrder,
+      projectNumberFilter,
+      clientNameFilter,
+      locationFilter,
+    } = req.query;
+
+    const projectNumberArray = Array.isArray(projectNumberFilter)
+      ? projectNumberFilter
+      : projectNumberFilter.length
+      ? [projectNumberFilter]
+      : [];
+
+    const clientNameArray = Array.isArray(clientNameFilter)
+      ? clientNameFilter
+      : clientNameFilter.length
+      ? [clientNameFilter]
+      : [];
+
+    let matchConditions = {
+      companyId: new mongoose.Types.ObjectId(companyId),
+    };
+
+    let orConditions = [];
+
+    if (locationFilter) {
+      orConditions.push({
+        placeOfVisit: {
+          $regex: locationFilter,
+          $options: "i",
+        },
+      });
+    }
+
+    if(orConditions.length){
+      matchConditions.$or = orConditions;
+    }
+
+    let siteVisitResponse = await SiteVisitModel.aggregate([
+      {
+        $match: matchConditions,
+      },
+      {
+        $lookup: {
+          from: "client",
+          localField: "clientId",
+          foreignField: "_id",
+          as: "clientId",
+        },
+      },
+      {
+        $unwind: "$clientId",
+      },
+      {
+        $lookup: {
+          from: "project",
+          localField: "projectId",
+          foreignField: "_id",
+          as: "projectId",
+        },
+      },
+      {
+        $unwind: "$projectId",
+      },
+      {
+        $project: {
+          _id: 1,
+          documentNo: 1,
+          placeOfVisit: 1,
+          purposeOfVisit: 1,
+          expensesBySuntech: 1,
+          "clientId._id": 1,
+          "clientId.clientName": 1,
+          "projectId._id": 1,
+          "projectId.projectCode": 1,
+        },
+      },
+      {
+        $sort: {
+          [sortField]: sortOrder === "asc" ? 1 : -1,
+        },
+      },
+    ]);
+
+    if(clientNameArray.length){
+      siteVisitResponse = siteVisitResponse.filter((item) => item.clientId.clientName.includes(clientNameArray));
+    }
+
+    if(projectNumberArray.length){
+      siteVisitResponse = siteVisitResponse.filter((item) => item.projectId.projectCode.includes(projectNumberArray));
+    }
+
+    if(createdFrom) {
+      siteVisitResponse = siteVisitResponse.filter((item) => moment(item.expensesBySuntech.from).isSameOrAfter(moment(createdFrom)));
+    }
+
+    if(createdTo) {
+      siteVisitResponse = siteVisitResponse.filter((item) => moment(item.expensesBySuntech.to).isSameOrBefore(moment(createdTo)));
+    }
+
+    if(!siteVisitResponse.length){
+      res.status(400).json({
+        status: false,
+        data: [],
+        statusCode: 400,
+        message: "No Site Visits Found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      data: siteVisitResponse,
+      statusCode: 200,
+      message: "Fetch Site Visits Successful",  
+    });
+
+
+
+  }
+  catch(error){
+    console.log("fetch sitevisit error", error);
+    res.status(500).json({
+      status: false,
+      statusCode: 500,
+      message: "Internal Server Error",
+      data: null,
+    });
+  }
+};
+
+
+const fetchOutwardsForCompany = async (req,res) => {
+  try{
+    const {
+      createdFrom,
+      createdTo,
+      companyId,
+      sortField,
+      sortOrder,
+      clientNameFilter,
+      docTypeFilter
+    } = req.query;
+
+    const clientNameArray = Array.isArray(clientNameFilter)
+      ? clientNameFilter
+      : clientNameFilter.length
+      ? [clientNameFilter]
+      : [];
+
+      const docTypeArray = Array.isArray(docTypeFilter)
+      ? docTypeFilter
+      : docTypeFilter.length
+      ? [docTypeFilter]
+      : [];
+
+      let matchConditions = {
+        companyId: new mongoose.Types.ObjectId(companyId),
+      }
+
+      if(docTypeArray.length){
+        orConditions.push({
+          docType:{
+            $regex: docTypeFilter,
+            $options: "i",
+          },
+        });
+      }
+
+      let orConditions = [];
+
+      let outwardsResponse = await OutwardModel.aggregate([
+        {
+          $match: matchConditions,
+        },
+        {
+          $lookup: {
+            from: "client",
+          localField: "clientId",
+          foreignField: "_id",
+          as: "clientId",
+          },
+        },
+        {
+          $unwind: "$clientId",
+        },
+        {
+          $project: {
+            _id: 1,
+            docNo: 1,
+            docType: 1,
+            description: 1,
+            outwardDate: 1,
+            "clientId._id": 1,
+            "clientId.clientName": 1,
+          },
+        },
+        {
+          $sort: {
+            [sortField]: sortOrder === "asc" ? 1 : -1,
+          },
+        },
+      ]);
+
+      if(clientNameArray.length){
+        outwardsResponse = outwardsResponse.filter((item) => item.clientId.clientName.includes(clientNameArray));
+      }
+
+      if(createdFrom) {
+        outwardsResponse = outwardsResponse.filter((item) => item.outwardDate.isSameOrAfter(createdFrom));
+      }
+
+      if(createdTo) {
+        outwardsResponse = outwardsResponse.filter((item) => item.outwardDate.isSameOrBefore(createdTo));
+      }
+
+      if(!outwardsResponse.length){
+        res.status(400).json({
+          status: false,
+          data: [],
+          statusCode: 400,
+          message: "No Outwards Found",
+        });
+        return;
+      }
+
+      res.status(200).json({
+        status: true,
+        data: outwardsResponse,
+        statusCode: 200,
+        message: "Fetch Outwards Successful",  
+      });
+  }
+  catch(error){
+    console.log("fetch outwards error", error);
+    res.status(500).json({
+      status: false,
+      statusCode: 500,
+      message: "Internal Server Error",
+      data: null,
+    });
+  }
+}
+
 module.exports = {
   getCompanyData,
   updateCompany,
@@ -1419,4 +1702,6 @@ module.exports = {
   fetchInvoiceLetterByInvoiceId,
   createUpdateInvoiceLetter,
   createUpdateSiteVisit,
+  fetchSiteVisitsForCompany,
+  fetchOutwardsForCompany,
 };

@@ -23,10 +23,11 @@ const SiteVisitSchema = new Schema(
             type: String,
             required: true,
         },
+        purposeOfVisit:{type:String,required:true},
         expensesBySuntech:[{
             name:{type:String, required:true},
-            from:{type:String, required:true},
-            to:{type:String, required:true},
+            from:{type:Date, required:true},
+            to:{type:Date, required:true},
             numberOfDays:{type:Number, required:true},
             airFare:{type:Number, required:true},
             conveyence:{type:Number, required:true},
