@@ -13,12 +13,13 @@ const OutwardSchema = new Schema(
             ref: 'project',
             required:true,
         },
-        clinetId:{
+        clientId:{
             type: Schema.Types.ObjectId,
             ref: 'project',
             required:true,
         },
-        docNumber:{type:String,required:true},
+        docNo:{type:String,required:true},
+        docType:{type:String,required:true},
         description: {
             type: String,
         },
