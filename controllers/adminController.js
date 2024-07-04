@@ -660,7 +660,7 @@ const createUpdateExpenses = async (req, res) => {
 const createUpdateOutward = async (req, res) => {
   try {
     let files = req.files;
-    let{
+    let {
       companyId,
       clientId,
       projectId,
@@ -668,8 +668,8 @@ const createUpdateOutward = async (req, res) => {
       docType,
       description,
       outwardDate,
-      documents
-    } = req.body
+      documents,
+    } = req.body;
     let dataToInsert = {
       companyId,
       clientId,
@@ -678,12 +678,12 @@ const createUpdateOutward = async (req, res) => {
       docType,
       description,
       outwardDate,
-      documents
+      documents,
     };
 
     let outwardResponse = await OutwardModel.create(dataToInsert);
 
-    if(outwardResponse){
+    if (outwardResponse) {
       res.status(200).json({
         status: true,
         data: outwardResponse,
@@ -1388,10 +1388,10 @@ const createUpdateSiteVisit = async (req, res) => {
       expenseBySuntech,
       attachedDocumentData,
     } = req.body;
-    
+
     attachedDocumentData.files = files[0];
     expenseBySuntech = JSON.parse(expenseBySuntech);
-    
+
     let dataToInsert = {
       companyId,
       projectId,
@@ -1402,8 +1402,7 @@ const createUpdateSiteVisit = async (req, res) => {
       expenseBySuntech,
       attachedDocumentData,
     };
-    
-    
+
     let siteVisitResponse = await SiteVisitModel.create(dataToInsert);
     if (siteVisitResponse) {
       res.status(200).json({
@@ -1413,8 +1412,7 @@ const createUpdateSiteVisit = async (req, res) => {
         message: "Create Site Visit Successful",
       });
     }
-  }
-   catch (error) {
+  } catch (error) {
     console.log(error);
     res.status(500).json({
       status: false,
@@ -1425,8 +1423,8 @@ const createUpdateSiteVisit = async (req, res) => {
   }
 };
 
-const fetchSiteVisitsForCompany = async (req,res) => {
-  try{
+const fetchSiteVisitsForCompany = async (req, res) => {
+  try {
     const {
       createdFrom,
       createdTo,
@@ -1437,24 +1435,24 @@ const fetchSiteVisitsForCompany = async (req,res) => {
       clientNameFilter,
       locationFilter,
     } = req.query;
-
     const projectNumberArray = Array.isArray(projectNumberFilter)
-      ? projectNumberFilter
-      : projectNumberFilter.length
-      ? [projectNumberFilter]
-      : [];
-
+    ? projectNumberFilter
+    : projectNumberFilter.length
+    ? [projectNumberFilter]
+    : [];
+    
     const clientNameArray = Array.isArray(clientNameFilter)
-      ? clientNameFilter
-      : clientNameFilter.length
-      ? [clientNameFilter]
-      : [];
-
+    ? clientNameFilter
+    : clientNameFilter.length
+    ? [clientNameFilter]
+    : [];
+    
     let matchConditions = {
       companyId: new mongoose.Types.ObjectId(companyId),
     };
-
+    
     let orConditions = [];
+  
 
     if (locationFilter) {
       orConditions.push({
@@ -1465,17 +1463,17 @@ const fetchSiteVisitsForCompany = async (req,res) => {
       });
     }
 
-    if(orConditions.length){
+    if (orConditions.length) {
       matchConditions.$or = orConditions;
     }
-
+    
     let siteVisitResponse = await SiteVisitModel.aggregate([
       {
         $match: matchConditions,
       },
       {
         $lookup: {
-          from: "client",
+          from: "clients",
           localField: "clientId",
           foreignField: "_id",
           as: "clientId",
@@ -1486,7 +1484,7 @@ const fetchSiteVisitsForCompany = async (req,res) => {
       },
       {
         $lookup: {
-          from: "project",
+          from: "projects",
           localField: "projectId",
           foreignField: "_id",
           as: "projectId",
@@ -1514,24 +1512,31 @@ const fetchSiteVisitsForCompany = async (req,res) => {
         },
       },
     ]);
-
-    if(clientNameArray.length){
-      siteVisitResponse = siteVisitResponse.filter((item) => item.clientId.clientName.includes(clientNameArray));
+    if (clientNameArray.length) {
+      siteVisitResponse = siteVisitResponse.filter((item) =>
+        item.clientId.clientName.includes(clientNameArray)
+      );
     }
 
-    if(projectNumberArray.length){
-      siteVisitResponse = siteVisitResponse.filter((item) => item.projectId.projectCode.includes(projectNumberArray));
+    if (createdFrom) {
+      siteVisitResponse = siteVisitResponse.filter((item) =>
+        moment(item.expensesBySuntech.from).isSameOrAfter(moment(createdFrom))
+      );
     }
 
-    if(createdFrom) {
-      siteVisitResponse = siteVisitResponse.filter((item) => moment(item.expensesBySuntech.from).isSameOrAfter(moment(createdFrom)));
+    if (createdTo) {
+      siteVisitResponse = siteVisitResponse.filter((item) =>
+        moment(item.expensesBySuntech.to).isSameOrBefore(moment(createdTo))
+      );
     }
 
-    if(createdTo) {
-      siteVisitResponse = siteVisitResponse.filter((item) => moment(item.expensesBySuntech.to).isSameOrBefore(moment(createdTo)));
+    if (createdTo) {
+      siteVisitResponse = siteVisitResponse.filter((item) =>
+        moment(item.expensesBySuntech.to).isSameOrBefore(moment(createdTo))
+      );
     }
 
-    if(!siteVisitResponse.length){
+    if (!siteVisitResponse.length) {
       res.status(400).json({
         status: false,
         data: [],
@@ -1545,13 +1550,9 @@ const fetchSiteVisitsForCompany = async (req,res) => {
       status: true,
       data: siteVisitResponse,
       statusCode: 200,
-      message: "Fetch Site Visits Successful",  
+      message: "Fetch Site Visits Successful",
     });
-
-
-
-  }
-  catch(error){
+  } catch (error) {
     console.log("fetch sitevisit error", error);
     res.status(500).json({
       status: false,
@@ -1562,17 +1563,16 @@ const fetchSiteVisitsForCompany = async (req,res) => {
   }
 };
 
-
-const fetchOutwardsForCompany = async (req,res) => {
-  try{
+const fetchOutwardsForCompany = async (req, res) => {
+  try {
     const {
+      companyId,
       createdFrom,
       createdTo,
-      companyId,
       sortField,
       sortOrder,
       clientNameFilter,
-      docTypeFilter
+      docTypeFilter,
     } = req.query;
 
     const clientNameArray = Array.isArray(clientNameFilter)
@@ -1581,90 +1581,95 @@ const fetchOutwardsForCompany = async (req,res) => {
       ? [clientNameFilter]
       : [];
 
-      const docTypeArray = Array.isArray(docTypeFilter)
-      ? docTypeFilter
-      : docTypeFilter.length
-      ? [docTypeFilter]
-      : [];
+    // const docTypeArray = Array.isArray(docTypeFilter)
+    //   ? docTypeFilter
+    //   : docTypeFilter.length
+    //   ? [docTypeFilter]
+    //   : [];
 
-      let matchConditions = {
-        companyId: new mongoose.Types.ObjectId(companyId),
-      }
+    let matchConditions = {
+      companyId: new mongoose.Types.ObjectId(companyId),
+    };
 
-      if(docTypeArray.length){
-        orConditions.push({
-          docType:{
-            $regex: docTypeFilter,
-            $options: "i",
-          },
-        });
-      }
-
-      let orConditions = [];
-
-      let outwardsResponse = await OutwardModel.aggregate([
-        {
-          $match: matchConditions,
+    if (docTypeFilter.length) {
+      orConditions.push({
+        docType: {
+          $regex: docTypeFilter,
+          $options: "i",
         },
-        {
-          $lookup: {
-            from: "client",
+      });
+    }
+
+    let orConditions = [];
+
+    let outwardsResponse = await OutwardModel.aggregate([
+      {
+        $match: matchConditions,
+      },
+      {
+        $lookup: {
+          from: "clients",
           localField: "clientId",
           foreignField: "_id",
           as: "clientId",
-          },
         },
-        {
-          $unwind: "$clientId",
+      },
+      {
+        $unwind: "$clientId",
+      },
+      {
+        $project: {
+          _id: 1,
+          docNo: 1,
+          docType: 1,
+          description: 1,
+          outwardDate: 1,
+          "clientId._id": 1,
+          "clientId.clientName": 1,
         },
-        {
-          $project: {
-            _id: 1,
-            docNo: 1,
-            docType: 1,
-            description: 1,
-            outwardDate: 1,
-            "clientId._id": 1,
-            "clientId.clientName": 1,
-          },
+      },
+      {
+        $sort: {
+          [sortField]: sortOrder === "asc" ? 1 : -1,
         },
-        {
-          $sort: {
-            [sortField]: sortOrder === "asc" ? 1 : -1,
-          },
-        },
-      ]);
+      },
+    ]);
 
-      if(clientNameArray.length){
-        outwardsResponse = outwardsResponse.filter((item) => item.clientId.clientName.includes(clientNameArray));
-      }
+    if (clientNameArray.length) {
+      outwardsResponse = outwardsResponse.filter((item) =>
+        item.clientId.clientName.includes(clientNameArray)
+      );
+    }
 
-      if(createdFrom) {
-        outwardsResponse = outwardsResponse.filter((item) => item.outwardDate.isSameOrAfter(createdFrom));
-      }
+    if (createdFrom) {
+      outwardsResponse = outwardsResponse.filter((item) =>
+        item.outwardDate.isSameOrAfter(createdFrom)
+      );
+    }
 
-      if(createdTo) {
-        outwardsResponse = outwardsResponse.filter((item) => item.outwardDate.isSameOrBefore(createdTo));
-      }
+    if (createdTo) {
+      outwardsResponse = outwardsResponse.filter((item) =>
+        item.outwardDate.isSameOrBefore(createdTo)
+      );
+    }
 
-      if(!outwardsResponse.length){
-        res.status(400).json({
-          status: false,
-          data: [],
-          statusCode: 400,
-          message: "No Outwards Found",
-        });
-        return;
-      }
-
-      res.status(200).json({
-        status: true,
-        data: outwardsResponse,
-        statusCode: 200,
-        message: "Fetch Outwards Successful",  
+    if (!outwardsResponse.length) {
+      res.status(400).json({
+        status: false,
+        data: [],
+        statusCode: 400,
+        message: "No Outwards Found",
       });
-  }
-  catch(error){
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      data: outwardsResponse,
+      statusCode: 200,
+      message: "Fetch Outwards Successful",
+    });
+  } catch (error) {
     console.log("fetch outwards error", error);
     res.status(500).json({
       status: false,
@@ -1673,7 +1678,134 @@ const fetchOutwardsForCompany = async (req,res) => {
       data: null,
     });
   }
-}
+};
+
+const getSiteVisitFilters = async (req, res) => {
+  try {
+    const { companyId } = req.query;
+    const response = await SiteVisitModel.aggregate([
+      {
+        $match: {
+          companyId: new mongoose.Types.ObjectId(companyId),
+        },
+      },
+      {
+        $lookup: {
+          from: "clients",
+          localField: "clientId",
+          foreignField: "_id",
+          as: "clientId",
+        },
+      },
+      {
+        $unwind: "$clientId",
+      },
+      {
+        $lookup: {
+          from: "projects",
+          localField: "projectId",
+          foreignField: "_id",
+          as: "projectId",
+        },
+      },
+      {
+        $unwind: "$projectId",
+      },
+      {
+        $project: {
+          _id: 1,
+          placeOfVisit: 1,
+          "clientId._id": 1,
+          "clientId.clientName": 1,
+          "projectId.projectCode": 1,
+          "projectId._id": 1,
+        },
+      },
+    ]);
+
+    if (!response) {
+      res.status(400).json({
+        status: false,
+        statusCode: 400,
+        message: "No Filters Found",
+        data: null,
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "Fetch Filters Successful",
+      data: response,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: false,
+      statusCode: 500,
+      message: "Internal Server Error",
+      data: null,
+    });
+  }
+};
+
+const getOutwardFilters = async (req, res) => {
+  try {
+    const { companyId } = req.query;
+    const response = await OutwardModel.aggregate([
+      {
+        $match: {
+          companyId: new mongoose.Types.ObjectId(companyId),
+        },
+      },
+      {
+        $lookup: {
+          from: "clients",
+          localField: "clientId",
+          foreignField: "_id",
+          as: "clientId",
+        },
+      },
+      {
+        $unwind: "$clientId",
+      },
+      {
+        $project: {
+          _id: 1,
+          docType: 1,
+          "clientId._id": 1,
+          "clientId.clientName": 1,
+        },
+      },
+    ]);
+
+    if (!response) {
+      res.status(400).json({
+        status: false,
+        statusCode: 400,
+        message: "No Filters found",
+        data: null,
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      statusCode: 200,
+      data: response,
+      message: "Fetch Filters Response Successful",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: false,
+      statusCode: 500,
+      message: "Internal Server Error",
+      data: null,
+    });
+  }
+};
 
 module.exports = {
   getCompanyData,
@@ -1704,4 +1836,6 @@ module.exports = {
   createUpdateSiteVisit,
   fetchSiteVisitsForCompany,
   fetchOutwardsForCompany,
+  getSiteVisitFilters,
+  getOutwardFilters,
 };

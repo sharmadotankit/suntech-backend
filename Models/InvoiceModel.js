@@ -5,17 +5,17 @@ const InvoiceSchema = new Schema(
     {
         companyId: {
             type: Schema.Types.ObjectId,
-            ref: 'company',
+            ref: 'companies',
             required: true,
         },
         clientId: {
             type: Schema.Types.ObjectId,
-            ref: 'client',
+            ref: 'clients',
             required: true,
         },
         projectId: {
             type: Schema.Types.ObjectId,
-            ref: 'project',
+            ref: 'projects',
             required: true,
         },
         invoiceNumber: { type: String, required: true },

@@ -5,12 +5,12 @@ const ProjectSchema = new Schema(
     {
         companyId:{
             type: Schema.Types.ObjectId,
-            ref: 'company',
+            ref: 'companies',
             required:true, 
         },
         clientId:{
             type: Schema.Types.ObjectId,
-            ref: 'client',
+            ref: 'clients',
             required:true,
         },
         offerId:{

@@ -15,7 +15,7 @@ const OutwardSchema = new Schema(
         },
         clientId:{
             type: Schema.Types.ObjectId,
-            ref: 'project',
+            ref: 'client',
             required:true,
         },
         docNo:{type:String,required:true},
