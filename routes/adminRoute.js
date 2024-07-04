@@ -41,13 +41,16 @@ router.get('/project-filters', authMiddleWare.checkIfAdmin, adminController.getP
 router.get('/invoice-filters', authMiddleWare.checkIfAdmin, adminController.getInvoiceFilters)
 router.post('/create-update-invoice', authMiddleWare.checkIfAdmin,upload.any(), adminController.createUpdateInvoice)
 router.post('/save-site-visit', authMiddleWare.checkIfAdmin,upload.any(), adminController.createUpdateSiteVisit)
-router.get('/site-visit', authMiddleWare.checkIfAdmin, adminController.fetchSiteVisitsForCompany)
+router.get('/site-visits', authMiddleWare.checkIfAdmin, adminController.fetchSiteVisitsForCompany)
+router.get('/site-visit-filter', authMiddleWare.checkIfAdmin, adminController.getSiteVisitFilters)
+router.get('/outward-filter', authMiddleWare.checkIfAdmin, adminController.getOutwardFilters)
 router.get('/outwards', authMiddleWare.checkIfAdmin, adminController.fetchOutwardsForCompany)
 router.post('/create-update-outward', authMiddleWare.checkIfAdmin,upload.any(), adminController.createUpdateOutward)
 router.get('/invoice/:invoiceId', authMiddleWare.checkIfAdmin, adminController.getInvoiceById)
 router.get('/invoice', authMiddleWare.checkIfAdmin, adminController.fetchInvoiceForCompany)
 router.get('/invoice-letter/:invoiceId', authMiddleWare.checkIfAdmin, adminController.fetchInvoiceLetterByInvoiceId)
-router.post('/create-update-invoice-letter',authMiddleWare.checkIfAdmin, adminController.createUpdateInvoiceLetter);
+router.post('/create-update-invoice-letter',authMiddleWare.checkIfAdmin, adminController.createUpdateInvoiceLetter)
+
 
 
 

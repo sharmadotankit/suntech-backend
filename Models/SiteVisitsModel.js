@@ -5,17 +5,17 @@ const SiteVisitSchema = new Schema(
     {
         companyId:{
             type: Schema.Types.ObjectId,
-            ref: 'company',
+            ref: 'companies',
             required:true, 
         },
         projectId:{
             type: Schema.Types.ObjectId,
-            ref: 'project',
+            ref: 'projects',
             required:true,
         },
         clientId:{
             type: Schema.Types.ObjectId,
-            ref: 'client',
+            ref: 'clients',
             required:true,
         },
         documentNo:{type:String,required:true},
