@@ -1807,6 +1807,81 @@ const getOutwardFilters = async (req, res) => {
   }
 };
 
+const getSiteVisitById = async (req, res) => {
+  try {
+    let siteVisitId = req.params.siteVisitId;
+    let siteVisitResponse = await SiteVisitModel.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(siteVisitId),
+        },
+      },
+      {
+        $lookup: {
+          from: "clients",
+          localField: "clientId",
+          foreignField: "_id",
+          as: "clientId",
+        },
+      },
+      {
+        $unwind: "$clientId",
+      },
+      {
+        $lookup: {
+          from: "projects",
+          localField: "projectId",
+          foreignField: "_id",
+          as: "projectId",
+        },
+      },
+      {
+        $unwind: "$projectId",
+      },
+      {
+        $project: {
+          _id: 1,
+          documentNo: 1,
+          placeOfVisit: 1,
+          purposeOfVisit: 1,
+          expensesBySuntech: 1,
+          "clientId._id": 1,
+          "clientId.clientName": 1,
+          "projectId.projectCode": 1,
+          "projectId._id": 1,
+          documents: 1,
+        },
+      },
+    ])
+
+    if (!siteVisitResponse) {
+      res.status(400).json({
+        status: false,
+        statusCode: 400,
+        message: "SiteVisit not found",
+        data: null,
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "Fetch SiteVisit Successful",
+      data: siteVisitResponse,
+    });
+
+
+  } catch (err) {
+    res.status(400).json({
+      status: false,
+      statusCode: 400,
+      message: err.message,
+      error: err,
+    });
+  }
+}
+
 module.exports = {
   getCompanyData,
   updateCompany,
@@ -1838,4 +1913,5 @@ module.exports = {
   fetchOutwardsForCompany,
   getSiteVisitFilters,
   getOutwardFilters,
+  getSiteVisitById,
 };

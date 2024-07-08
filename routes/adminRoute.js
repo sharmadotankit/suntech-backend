@@ -42,6 +42,7 @@ router.get('/invoice-filters', authMiddleWare.checkIfAdmin, adminController.getI
 router.post('/create-update-invoice', authMiddleWare.checkIfAdmin,upload.any(), adminController.createUpdateInvoice)
 router.post('/save-site-visit', authMiddleWare.checkIfAdmin,upload.any(), adminController.createUpdateSiteVisit)
 router.get('/site-visits', authMiddleWare.checkIfAdmin, adminController.fetchSiteVisitsForCompany)
+router.get('/site-visit/:siteVisitId', authMiddleWare.checkIfAdmin, adminController.getSiteVisitById)
 router.get('/site-visit-filter', authMiddleWare.checkIfAdmin, adminController.getSiteVisitFilters)
 router.get('/outward-filter', authMiddleWare.checkIfAdmin, adminController.getOutwardFilters)
 router.get('/outwards', authMiddleWare.checkIfAdmin, adminController.fetchOutwardsForCompany)
