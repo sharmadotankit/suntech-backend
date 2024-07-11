@@ -36,6 +36,7 @@ const SiteVisitSchema = new Schema(
             gst:{type:Number, required:true},
             total:{type:Number, required:true},
         }],
+        total:{type:Number, required:true},
         documents: [{
             file: {
                 fieldname: { type: String },

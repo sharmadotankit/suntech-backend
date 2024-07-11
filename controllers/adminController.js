@@ -1386,6 +1386,7 @@ const createUpdateSiteVisit = async (req, res) => {
       placeOfVisit,
       purposeOfVisit,
       expenseBySuntech,
+      total,
       attachedDocumentData,
     } = req.body;
 
@@ -1400,6 +1401,7 @@ const createUpdateSiteVisit = async (req, res) => {
       placeOfVisit,
       purposeOfVisit,
       expenseBySuntech,
+      total,
       attachedDocumentData,
     };
 
@@ -1850,6 +1852,7 @@ const getSiteVisitById = async (req, res) => {
           "projectId.projectCode": 1,
           "projectId._id": 1,
           documents: 1,
+          total: 1,
         },
       },
     ])
