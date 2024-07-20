@@ -350,6 +350,7 @@ const createUpdateOffer = async (req, res) => {
         offerData
       );
     } else {
+      offerData = {...offerData, offerCode : offerData?.offerCode+"-" + offerData?.description};
       offerResponse = await OfferLetterModel.create(offerData);
     }
 

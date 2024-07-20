@@ -29,7 +29,6 @@ const OfferSchema = new Schema(
         offerCodeNumber: {
             type: Number,
             required: true,
-            unique: true,
         },
         offerTotal:{
             type:Number,
