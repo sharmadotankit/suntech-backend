@@ -25,14 +25,14 @@ const ClientSchema = new Schema(
         allAddress: [{
             billingAddress: {
                 addressLine1: { type: String, required: true },
-                addressLine2: { type: String, required: true },
+                addressLine2: { type: String},
                 city: { type: String, required: true },
                 state: { type: String, required: true },
                 zipCode: { type: String, required: true },
             },
             shippingAddress: {
                 addressLine1: { type: String, required: true },
-                addressLine2: { type: String, required: true },
+                addressLine2: { type: String },
                 city: { type: String, required: true },
                 state: { type: String, required: true },
                 zipCode: { type: String, required: true },
