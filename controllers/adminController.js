@@ -117,6 +117,17 @@ const createUpdateClient = async (req, res) => {
       clientCodeNumber,
     } = req.body;
 
+    let exisingClientData = await ClientModel.find({gstNo: gstNo})
+    if(exisingClientData.length){
+      res.status(400).json({
+        status: false,
+        statusCode: 400,
+        message: "Client with GST No already exists",
+        data: null,
+      });
+      return;
+    }
+
     allAddress = JSON.parse(allAddress);
     clientDocumentsData = JSON.parse(clientDocumentsData);
 
