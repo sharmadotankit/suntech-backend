@@ -115,18 +115,22 @@ const createUpdateClient = async (req, res) => {
       additionalData,
       companyId,
       clientCodeNumber,
+      clientInitials
     } = req.body;
 
-    let exisingClientData = await ClientModel.find({gstNo: gstNo})
-    if(exisingClientData.length){
-      res.status(400).json({
-        status: false,
-        statusCode: 400,
-        message: "Client with GST No already exists",
-        data: null,
-      });
-      return;
+    if (!_id) {
+      let exisingClientData = await ClientModel.find({ gstNo: gstNo })
+      if (exisingClientData.length) {
+        res.status(400).json({
+          status: false,
+          statusCode: 400,
+          message: "Client with GST No already exists",
+          data: null,
+        });
+        return;
+      }
     }
+
 
     allAddress = JSON.parse(allAddress);
     clientDocumentsData = JSON.parse(clientDocumentsData);
@@ -148,6 +152,7 @@ const createUpdateClient = async (req, res) => {
       clientDocuments: clientDocumentsData,
       additionalData,
       companyId,
+      clientInitials,
       clientCodeNumber: parseInt(clientCodeNumber),
     };
 
@@ -201,7 +206,7 @@ const fetchClientsForCompany = async (req, res) => {
     }
 
     const clients = await ClientModel.find({ ...fetchQuery })
-      .select("_id clientName clientCode gstNo allAddress")
+      .select("_id clientName clientCode gstNo allAddress clientInitials")
       .sort(sortQuery)
       .lean();
 
@@ -361,7 +366,7 @@ const createUpdateOffer = async (req, res) => {
         offerData
       );
     } else {
-      offerData = {...offerData, offerCode : offerData?.offerCode+"-" + offerData?.description};
+      offerData = { ...offerData, offerCode: offerData?.offerCode + "-" + offerData?.description };
       offerResponse = await OfferLetterModel.create(offerData);
     }
 
@@ -871,20 +876,20 @@ const fetchProjectsForCompany = async (req, res) => {
     const projectTypeArray = Array.isArray(projectTypeFilter)
       ? projectTypeFilter
       : projectTypeFilter.length
-      ? [projectTypeFilter]
-      : [];
+        ? [projectTypeFilter]
+        : [];
 
     const projectNumberArray = Array.isArray(projectNumberFilter)
       ? projectNumberFilter
       : projectNumberFilter.length
-      ? [projectNumberFilter]
-      : [];
+        ? [projectNumberFilter]
+        : [];
 
     const clientNameArray = Array.isArray(clientNameFilter)
       ? clientNameFilter
       : clientNameFilter.length
-      ? [clientNameFilter]
-      : [];
+        ? [clientNameFilter]
+        : [];
 
     let matchConditions = {
       companyId: new mongoose.Types.ObjectId(companyId),
@@ -892,14 +897,6 @@ const fetchProjectsForCompany = async (req, res) => {
 
     let orConditions = [];
 
-    // if (clientNameFilter) {
-    //   orConditions.push({
-    //     "clientId.clientName": {
-    //       $regex: clientNameFilter,
-    //       $options: "i",
-    //     },
-    //   });
-    // }
 
     if (projectNumberArray.length) {
       orConditions.push({
@@ -1035,20 +1032,20 @@ const fetchInvoiceForCompany = async (req, res) => {
     const projectTypeArray = Array.isArray(projectTypeFilter)
       ? projectTypeFilter
       : projectTypeFilter.length
-      ? [projectTypeFilter]
-      : [];
+        ? [projectTypeFilter]
+        : [];
 
     const projectNumberArray = Array.isArray(projectNumberFilter)
       ? projectNumberFilter
       : projectNumberFilter.length
-      ? [projectNumberFilter]
-      : [];
+        ? [projectNumberFilter]
+        : [];
 
     const clientNameArray = Array.isArray(clientNameFilter)
       ? clientNameFilter
       : clientNameFilter.length
-      ? [clientNameFilter]
-      : [];
+        ? [clientNameFilter]
+        : [];
 
     let matchConditions = {
       companyId: new mongoose.Types.ObjectId(companyId),
@@ -1450,23 +1447,23 @@ const fetchSiteVisitsForCompany = async (req, res) => {
       locationFilter,
     } = req.query;
     const projectNumberArray = Array.isArray(projectNumberFilter)
-    ? projectNumberFilter
-    : projectNumberFilter.length
-    ? [projectNumberFilter]
-    : [];
-    
+      ? projectNumberFilter
+      : projectNumberFilter.length
+        ? [projectNumberFilter]
+        : [];
+
     const clientNameArray = Array.isArray(clientNameFilter)
-    ? clientNameFilter
-    : clientNameFilter.length
-    ? [clientNameFilter]
-    : [];
-    
+      ? clientNameFilter
+      : clientNameFilter.length
+        ? [clientNameFilter]
+        : [];
+
     let matchConditions = {
       companyId: new mongoose.Types.ObjectId(companyId),
     };
-    
+
     let orConditions = [];
-  
+
 
     if (locationFilter) {
       orConditions.push({
@@ -1480,7 +1477,7 @@ const fetchSiteVisitsForCompany = async (req, res) => {
     if (orConditions.length) {
       matchConditions.$or = orConditions;
     }
-    
+
     let siteVisitResponse = await SiteVisitModel.aggregate([
       {
         $match: matchConditions,
@@ -1592,8 +1589,8 @@ const fetchOutwardsForCompany = async (req, res) => {
     const clientNameArray = Array.isArray(clientNameFilter)
       ? clientNameFilter
       : clientNameFilter.length
-      ? [clientNameFilter]
-      : [];
+        ? [clientNameFilter]
+        : [];
 
     // const docTypeArray = Array.isArray(docTypeFilter)
     //   ? docTypeFilter

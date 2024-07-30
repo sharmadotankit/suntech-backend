@@ -22,6 +22,10 @@ const ClientSchema = new Schema(
             required: true,
             unique: true,
         },
+        clientInitials: {
+            type: String,
+            required: true,
+        },
         allAddress: [{
             billingAddress: {
                 addressLine1: { type: String, required: true },
